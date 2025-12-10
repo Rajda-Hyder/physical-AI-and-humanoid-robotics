@@ -1,0 +1,42 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Build outputs
+/build/
+/dist/
+/.docusaurus/
+
+# Misc
+*.log
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+*.tmp
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+*.iml
+*.suo
+*.user
+
+# Testing
+/coverage/
+.nyc_output/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Package manager locks
+package-lock.json
+yarn.lock

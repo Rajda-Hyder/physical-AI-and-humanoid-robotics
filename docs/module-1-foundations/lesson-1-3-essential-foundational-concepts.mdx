@@ -1,0 +1,201 @@
+---
+title: "Essential Foundational Concepts"
+description: "Master crucial concepts for Physical AI including agents, environments, states, actions, observations, and rewards."
+sidebar_position: 3
+tags: [physical-ai, concepts, vocabulary, module-1, lesson-1-3, foundations]
+---
+
+# Lesson 1.3: Essential Foundational Concepts
+
+:::info Lesson Status
+This lesson is in progress. Core vocabulary framework is in place.
+:::
+
+## Lesson Overview
+
+Every scientific and technical field has foundational vocabulary. Physics has "force," "velocity," and "energy." Biology has "cell," "DNA," and "organism." **Physical AI** also has key concepts that you'll use throughout this textbook.
+
+This lesson introduces these essential terms and explains how they work together in Physical AI systems. Mastering these concepts now will make everything you learn afterward much clearer.
+
+---
+
+## Learning Objectives
+
+By the end of this lesson, you will be able to:
+
+- Define agent, environment, state, action, observation, and reward
+- Explain how these concepts interact in Physical AI systems
+- Apply these concepts to analyze real-world robotic scenarios
+- Use this vocabulary to describe Physical AI systems
+
+---
+
+## Core Concepts
+
+### The Agent
+
+An **agent** is an entity—usually a robot—that perceives its environment and takes actions to achieve goals.
+
+**Key characteristics**:
+- Has sensors (can perceive)
+- Has actuators (can act)
+- Makes decisions based on perception
+- Tries to achieve objectives
+
+**Examples**: A robot arm in a factory, an autonomous vehicle, a humanoid robot
+
+### The Environment
+
+The **environment** is everything outside the agent. It's the world the agent perceives and interacts with.
+
+**Characteristics**:
+- Contains objects, obstacles, and other agents
+- Follows physical laws (gravity, friction, etc.)
+- Generates sensory information for the agent
+- Responds to the agent's actions
+
+**Examples**: A factory floor, a city street, a home, a laboratory
+
+### State
+
+The **state** is a complete description of the current situation—what's happening right now in the environment and the agent itself.
+
+**What defines a state?**
+- Agent position and orientation
+- Positions of objects in the environment
+- Environmental conditions (temperature, lighting, etc.)
+- Internal agent state (battery level, joint angles, etc.)
+
+**Example**: A robot's state might include: "Robot is 2 meters from the table, facing north, with gripper open, in a room with lighting level 500 lux."
+
+### Action
+
+An **action** is something the agent does—a command sent to its actuators.
+
+**Types of actions**:
+- Movement (move forward, turn left, raise arm)
+- Grasping (open gripper, close gripper)
+- Interaction (push button, flip switch)
+- No action (wait, do nothing)
+
+**Important**: Not all actions succeed. A gripper might fail to grasp a slippery object.
+
+### Observation
+
+An **observation** is sensory information—what the agent perceives through its sensors.
+
+**Types of observations**:
+- Visual (camera images)
+- Tactile (touch, pressure)
+- Proprioceptive (awareness of body position)
+- Auditory (sounds)
+- Environmental (temperature, distance measurements)
+
+**Key insight**: The observation might not perfectly match reality. Sensors have limitations and noise.
+
+### Reward
+
+A **reward** is a signal that tells the agent whether its actions were good or bad. It's the feedback signal for learning.
+
+**Reward mechanics**:
+- Positive reward: "Good action! Do more of this."
+- Negative reward (penalty): "Bad action. Avoid this."
+- Zero reward: "Neutral. Keep learning."
+
+**Examples**:
+- +1 reward for successfully picking up an object
+- -10 penalty for dropping an object
+- -0.1 for each second the task takes (encourages speed)
+
+---
+
+## The Agent-Environment Loop
+
+Here's how these concepts work together:
+
+```
+1. OBSERVE: Agent perceives current state via sensors
+           ↓
+2. DECIDE: Agent chooses an action based on observation
+           ↓
+3. ACT: Agent executes the action via actuators
+           ↓
+4. RECEIVE: Environment changes state and sends observation + reward back
+           ↓
+[Loop repeats continuously]
+```
+
+**Example**: A robot picking up a coffee cup
+
+1. **Observe**: Camera sees cup at position (1.5m, 0.5m); touch sensors report no contact
+2. **Decide**: Algorithm decides to move arm toward cup
+3. **Act**: Motors move arm and hand toward cup
+4. **Receive**: Position updated; when gripper touches cup, touch sensors activate (+1 reward if grasped successfully)
+
+---
+
+## Hands-On Section
+
+### Exercise 1: Identify Components
+
+Watch a video of a robot performing a task (real or simulated). Identify and describe:
+- **Agent**: What is the robot?
+- **Environment**: What is the robot's world?
+- **States**: Describe 3 different states during the task
+- **Actions**: List 5 actions the robot takes
+- **Observations**: What sensors does it seem to use?
+- **Reward**: How do you know if the robot succeeded?
+
+### Exercise 2: Design Your Own Reward System
+
+Imagine you're training a robot to clean a room. Design a reward system:
+- What gets **positive rewards**? (+1, +10, etc.)
+- What gets **negative rewards/penalties**? (-1, -5, etc.)
+- How would you prevent unintended behaviors (e.g., robot moving furniture just to "complete" the task)?
+
+---
+
+## Physical AI Mindset
+
+[Practical application of these concepts in real robotic systems]
+
+---
+
+## Common Mistakes & Misconceptions
+
+### ❌ Mistake: "The state is what sensors report"
+
+**Truth**: The **true state** is the actual reality. The **observed state** is what sensors report. These might differ due to sensor limitations, noise, or occlusion (blocking).
+
+### ❌ Mistake: "Rewards always reflect success"
+
+**Truth**: Reward design is challenging. A poorly designed reward can lead to unintended behaviors. Example: If you reward "objects moved," a robot might just push things around randomly.
+
+---
+
+## Summary
+
+**Vocabulary to Remember**:
+- **Agent**: The robot or entity making decisions
+- **Environment**: The world the agent interacts with
+- **State**: The current situation
+- **Action**: What the agent does
+- **Observation**: What the agent perceives
+- **Reward**: Feedback signal for learning
+
+These six concepts form the foundation of nearly all Physical AI systems.
+
+---
+
+## Practice / Reflection Questions
+
+1. Describe a Physical AI system you know using all six vocabulary terms
+2. Why might an agent's observation differ from the true state?
+3. How would you design a reward system for a robot to do homework?
+4. What happens if an agent chooses an action that fails (e.g., gripper can't grasp)?
+
+---
+
+:::tip Next Module
+Ready to learn about the hardware that makes embodied intelligence possible? [Module 2: Embodied Intelligence & Robotics Core](/docs/module-2-embodied-robotics/lesson-2-1-sensing-taking-action)
+:::

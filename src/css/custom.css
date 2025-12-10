@@ -1,0 +1,299 @@
+/**
+ * Custom CSS for Physical AI & Humanoid Robotics Textbook
+ * Imports design system variables and global styles
+ */
+
+@import url('https://fonts.googleapis.com/css2?family=Exo+2:wght@400;600;700&family=Inter:wght@300;400;500;600;700&family=Roboto:wght@300;400;500;700&display=swap');
+
+/* Import design system variables */
+@import './variables.module.css';
+
+/* ========== DOCUSAURUS OVERRIDES ========== */
+
+:root {
+  /* Docusaurus color variables */
+  --ifm-color-primary: var(--color-primary);
+  --ifm-color-primary-light: var(--color-primary-light);
+  --ifm-color-primary-lighter: var(--color-primary-light);
+  --ifm-color-primary-lightest: #66E5D0;
+  --ifm-color-primary-dark: var(--color-primary-dark);
+  --ifm-color-primary-darker: #008080;
+  --ifm-color-primary-darkest: #006666;
+
+  --ifm-color-secondary: var(--color-secondary);
+  --ifm-color-info: var(--color-info);
+  --ifm-color-success: var(--color-success);
+  --ifm-color-warning: var(--color-warning);
+  --ifm-color-danger: var(--color-error);
+
+  /* Background & Text */
+  --ifm-background-color: var(--color-background);
+  --ifm-background-surface-primary: var(--color-background-light);
+  --ifm-color-gray-0: var(--color-background);
+  --ifm-color-gray-100: var(--color-background-lighter);
+  --ifm-color-gray-900: var(--color-text-dark);
+
+  --ifm-font-color-base: var(--color-text);
+  --ifm-font-color-base-inverse: var(--color-text-dark);
+
+  /* Typography */
+  --ifm-font-family-base: var(--font-body);
+  --ifm-heading-font-family: var(--font-heading);
+  --ifm-code-font-size: 90%;
+  --ifm-code-background: var(--color-background-light);
+
+  /* Spacing */
+  --ifm-spacing-horizontal: 1rem;
+  --ifm-spacing-vertical: 1rem;
+
+  /* Transitions */
+  --ifm-transition-fast: var(--transition-fast);
+  --ifm-transition-slow: var(--transition-slow);
+
+  /* Borders */
+  --ifm-global-border-radius: var(--radius-md);
+  --ifm-border-color: var(--color-border);
+}
+
+/* ========== DARK MODE (DEFAULT) ========== */
+
+[data-theme='dark'] {
+  --ifm-color-content: var(--color-text);
+  --ifm-breadcrumb-color: var(--color-text-muted);
+  --ifm-breadcrumb-color-active: var(--color-primary);
+}
+
+/* ========== LIGHT MODE (FALLBACK) ========== */
+
+[data-theme='light'] {
+  --color-background: #FFFFFF;
+  --color-background-light: #F5F5F5;
+  --color-background-lighter: #EEEEEE;
+  --color-text: #1A1A2E;
+  --color-text-dark: #000000;
+  --color-text-muted: #666666;
+  --color-border: #DDDDDD;
+  --color-hover: rgba(0, 209, 178, 0.15);
+
+  --ifm-color-content: var(--color-text);
+  --ifm-breadcrumb-color: var(--color-text-muted);
+  --ifm-breadcrumb-color-active: var(--color-primary);
+}
+
+/* ========== DOCUSAURUS COMPONENT OVERRIDES ========== */
+
+/* Navbar */
+.navbar {
+  background-color: var(--color-background-light);
+  border-bottom: 1px solid var(--color-border);
+  box-shadow: var(--shadow-md);
+}
+
+.navbar__title {
+  font-family: var(--font-heading);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-dark);
+}
+
+.navbar__link {
+  color: var(--color-text);
+  transition: color var(--transition-normal);
+}
+
+.navbar__link:hover,
+.navbar__link--active {
+  color: var(--color-primary);
+}
+
+/* Sidebar */
+.sidebar {
+  background-color: var(--color-background-light);
+  border-right: 1px solid var(--color-border);
+}
+
+.sidebar__item {
+  color: var(--color-text);
+}
+
+.sidebar__link--active {
+  background-color: var(--color-hover);
+  color: var(--color-primary);
+  font-weight: var(--font-weight-semibold);
+}
+
+/* Main Content */
+.main-wrapper {
+  background-color: var(--color-background);
+}
+
+.markdown h1,
+.markdown h2,
+.markdown h3 {
+  color: var(--color-text-dark);
+  margin-top: var(--spacing-xl);
+  margin-bottom: var(--spacing-md);
+}
+
+.markdown h1 {
+  font-size: var(--font-size-3xl);
+}
+
+.markdown h2 {
+  font-size: var(--font-size-2xl);
+  border-bottom: 2px solid var(--color-border);
+  padding-bottom: var(--spacing-sm);
+}
+
+.markdown h3 {
+  font-size: var(--font-size-xl);
+}
+
+/* Tables */
+.markdown table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: var(--spacing-lg) 0;
+}
+
+.markdown table thead {
+  background-color: var(--color-background-light);
+  color: var(--color-text-dark);
+  font-weight: var(--font-weight-bold);
+}
+
+.markdown table td,
+.markdown table th {
+  border: 1px solid var(--color-border);
+  padding: var(--spacing-sm) var(--spacing-md);
+  text-align: left;
+}
+
+.markdown table tbody tr:hover {
+  background-color: var(--color-hover);
+}
+
+/* Buttons */
+.button {
+  font-family: var(--font-body);
+  border-radius: var(--radius-md);
+  font-weight: var(--font-weight-semibold);
+  transition: all var(--transition-normal);
+  padding: var(--spacing-sm) var(--spacing-lg);
+  border: none;
+  cursor: pointer;
+}
+
+.button--primary {
+  background-color: var(--color-primary);
+  color: var(--color-background);
+}
+
+.button--primary:hover {
+  background-color: var(--color-primary-light);
+  box-shadow: var(--shadow-glow);
+}
+
+.button--secondary {
+  background-color: var(--color-secondary);
+  color: var(--color-background);
+}
+
+.button--secondary:hover {
+  background-color: var(--color-secondary-light);
+  box-shadow: var(--shadow-glow-secondary);
+}
+
+/* Footer */
+.footer {
+  background-color: var(--color-background-light);
+  border-top: 1px solid var(--color-border);
+  color: var(--color-text);
+}
+
+.footer__title {
+  color: var(--color-text-dark);
+  font-weight: var(--font-weight-bold);
+}
+
+.footer__link-item {
+  color: var(--color-text);
+  transition: color var(--transition-normal);
+}
+
+.footer__link-item:hover {
+  color: var(--color-primary);
+}
+
+/* Search */
+.search-box {
+  background-color: var(--color-background-light);
+  border: 1px solid var(--color-border);
+  color: var(--color-text);
+}
+
+/* Blockquote */
+.markdown > blockquote {
+  border-left: 4px solid var(--color-primary);
+  padding-left: var(--spacing-lg);
+  padding-top: var(--spacing-sm);
+  padding-bottom: var(--spacing-sm);
+  background-color: var(--color-hover);
+  color: var(--color-text);
+  font-style: italic;
+}
+
+/* Admonitions (notes, tips, warnings) */
+.alert {
+  border-left: 4px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-md);
+  margin: var(--spacing-lg) 0;
+}
+
+.alert--note {
+  background-color: var(--color-hover);
+  border-left-color: var(--color-primary);
+}
+
+.alert--tip {
+  background-color: rgba(81, 207, 102, 0.1);
+  border-left-color: var(--color-success);
+}
+
+.alert--warning {
+  background-color: rgba(255, 212, 59, 0.1);
+  border-left-color: var(--color-warning);
+}
+
+.alert--danger {
+  background-color: rgba(255, 136, 136, 0.1);
+  border-left-color: var(--color-error);
+}
+
+/* ========== RESPONSIVE DESIGN ========== */
+
+@media (max-width: 640px) {
+  h1 {
+    font-size: var(--font-size-2xl);
+  }
+
+  h2 {
+    font-size: var(--font-size-xl);
+  }
+
+  h3 {
+    font-size: var(--font-size-lg);
+  }
+
+  .markdown h1 {
+    font-size: var(--font-size-2xl);
+  }
+
+  .markdown h2 {
+    font-size: var(--font-size-xl);
+  }
+
+  .markdown h3 {
+    font-size: var(--font-size-lg);
+  }
+}

@@ -1,0 +1,259 @@
+/* Dashboard Page Styles */
+
+.dashboardContainer {
+  min-height: calc(100vh - 60px);
+  background: linear-gradient(to bottom, #f8fafc, #f1f5f9);
+  padding: 2rem 1rem;
+}
+
+.dashboardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 1200px;
+  margin: 0 auto 3rem;
+  padding: 2rem;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.userInfo h1 {
+  font-size: 1.875rem;
+  margin: 0 0 0.5rem 0;
+  color: #0f172a;
+}
+
+.email {
+  color: #64748b;
+  margin: 0;
+}
+
+.signOutButton {
+  padding: 0.75rem 1.5rem;
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.signOutButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(239, 68, 68, 0.3);
+}
+
+.dashboardContent {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.section {
+  margin-bottom: 3rem;
+}
+
+.section h2 {
+  font-size: 1.5rem;
+  margin-bottom: 1.5rem;
+  color: #0f172a;
+}
+
+/* Modules Grid */
+.modulesGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+}
+
+.moduleCard {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s;
+  border: 1px solid #e2e8f0;
+}
+
+.moduleCard:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 20px 35px rgba(0, 212, 170, 0.15);
+  border-color: #00d4aa;
+}
+
+.moduleCard h3 {
+  font-size: 1.125rem;
+  margin: 0 0 0.75rem 0;
+  color: #0f172a;
+}
+
+.moduleCard p {
+  color: #64748b;
+  margin: 0 0 1rem 0;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.moduleCard a {
+  color: #00d4aa;
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.2s;
+}
+
+.moduleCard a:hover {
+  color: #00a878;
+}
+
+/* Stats Grid */
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1.5rem;
+}
+
+.statCard {
+  background: white;
+  border-radius: 12px;
+  padding: 2rem 1.5rem;
+  text-align: center;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border-left: 4px solid #00d4aa;
+  transition: all 0.3s;
+}
+
+.statCard:hover {
+  box-shadow: 0 10px 25px rgba(0, 212, 170, 0.15);
+}
+
+.statNumber {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #00d4aa;
+  margin-bottom: 0.5rem;
+}
+
+.statCard p {
+  color: #64748b;
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+/* Resources Grid */
+.resourcesGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+
+.resourceCard {
+  background: white;
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border-top: 3px solid #00d4aa;
+  transition: all 0.3s;
+}
+
+.resourceCard:hover {
+  box-shadow: 0 10px 25px rgba(0, 212, 170, 0.15);
+  transform: translateY(-2px);
+}
+
+.resourceCard h4 {
+  font-size: 1.125rem;
+  margin: 0 0 0.75rem 0;
+  color: #0f172a;
+}
+
+.resourceCard p {
+  color: #64748b;
+  margin: 0;
+  line-height: 1.6;
+}
+
+/* Loading State */
+.loadingState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid #e2e8f0;
+  border-top-color: #00d4aa;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.loadingState p {
+  margin-top: 1rem;
+  color: #64748b;
+  font-size: 1rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .dashboardHeader {
+    flex-direction: column;
+    text-align: center;
+    gap: 1.5rem;
+  }
+
+  .userInfo h1 {
+    font-size: 1.5rem;
+  }
+
+  .modulesGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .statsGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .resourcesGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .section h2 {
+    font-size: 1.25rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .dashboardContainer {
+    padding: 1rem 0.5rem;
+  }
+
+  .dashboardHeader {
+    padding: 1.5rem 1rem;
+  }
+
+  .moduleCard {
+    padding: 1rem;
+  }
+
+  .statCard {
+    padding: 1.5rem 1rem;
+  }
+
+  .resourceCard {
+    padding: 1.5rem;
+  }
+
+  .statNumber {
+    font-size: 2rem;
+  }
+}

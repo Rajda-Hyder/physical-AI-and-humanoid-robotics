@@ -1,0 +1,102 @@
+.featuresSection {
+  padding: var(--spacing-2xl) var(--spacing-lg);
+  background-color: rgba(26, 26, 46, 0.8);
+}
+
+.featuresContainer {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.sectionTitle {
+  font-size: var(--font-size-3xl);
+  font-weight: 700;
+  color: var(--color-primary);
+  text-align: center;
+  margin: 0 0 var(--spacing-md) 0;
+  font-family: var(--font-heading);
+}
+
+.sectionSubtitle {
+  font-size: var(--font-size-lg);
+  color: var(--color-text);
+  text-align: center;
+  margin: 0 0 var(--spacing-2xl) 0;
+  font-family: var(--font-body);
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.featuresGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: var(--spacing-xl);
+  margin-top: var(--spacing-xl);
+}
+
+.featureCard {
+  background: linear-gradient(135deg, rgba(0, 209, 178, 0.1) 0%, rgba(255, 107, 107, 0.05) 100%);
+  border: 1px solid rgba(0, 209, 178, 0.2);
+  border-radius: 12px;
+  padding: var(--spacing-xl);
+  text-align: center;
+  transition: all var(--transition-normal);
+}
+
+.featureCard:hover {
+  border-color: var(--color-primary);
+  background: linear-gradient(135deg, rgba(0, 209, 178, 0.15) 0%, rgba(255, 107, 107, 0.1) 100%);
+  box-shadow: 0 12px 32px rgba(0, 209, 178, 0.1);
+  transform: translateY(-4px);
+}
+
+.featureIcon {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto var(--spacing-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.featureIcon img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.featureTitle {
+  font-size: var(--font-size-xl);
+  font-weight: 600;
+  color: var(--color-primary);
+  margin: 0 0 var(--spacing-sm) 0;
+  font-family: var(--font-heading);
+}
+
+.featureDescription {
+  font-size: var(--font-size-base);
+  color: var(--color-text);
+  margin: 0;
+  font-family: var(--font-body);
+  line-height: 1.6;
+}
+
+@media (max-width: 768px) {
+  .featuresSection {
+    padding: var(--spacing-xl) var(--spacing-md);
+  }
+
+  .sectionTitle {
+    font-size: var(--font-size-2xl);
+  }
+
+  .featuresGrid {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-lg);
+  }
+
+  .featureCard {
+    padding: var(--spacing-lg);
+  }
+}

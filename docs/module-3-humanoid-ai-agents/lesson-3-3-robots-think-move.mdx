@@ -1,0 +1,440 @@
+---
+title: "Robots That Think and Move"
+description: "Explore path planning, obstacle avoidance, task sequencing, and decision-making that enables autonomous robot behavior. Learn how robots reason about their environment and plan complex actions."
+sidebar_position: 3
+tags: [path-planning, obstacle-avoidance, navigation, task-planning, autonomy, module-3, lesson-3-3]
+---
+
+# Lesson 3.3: Robots That Think and Move
+
+## Lesson Overview
+
+You've learned how humanoid robots are built and how AI agents control them. Now comes the question: **How do robots decide what to do?**
+
+In the real world, robots can't just follow pre-programmed instructions. They encounter obstacles, changing environments, and novel situations. They must **plan** - figure out a sequence of actions to achieve their goals - and **navigate** - find feasible paths through complex spaces.
+
+This lesson explores the computational challenges of robot autonomy. You'll learn the algorithms robots use to plan paths, avoid obstacles, sequence tasks, and make intelligent decisions in dynamic environments. These are the algorithms that enable robots to act as autonomous agents, not just remote-controlled machines.
+
+---
+
+## Learning Objectives
+
+By the end of this lesson, you will be able to:
+
+- **Explain** the difference between path planning and motion planning
+- **Describe** common algorithms for robot path planning (Dijkstra, A*, RRT)
+- **Understand** how robots detect and avoid obstacles in real-time
+- **Analyze** task planning and temporal planning problems
+- **Apply** planning algorithms to design autonomous behaviors for humanoid robots
+
+---
+
+## Core Concepts
+
+### What is Planning?
+
+**Planning** is the process of computing a sequence of actions that achieves a goal, given the current state and constraints.
+
+Example: A humanoid robot is tasked with "bring me a coffee from the kitchen." The robot must:
+
+1. **Perception**: Where is the kitchen? Where are obstacles?
+2. **Planning**: How do I get to the kitchen? What route is safest?
+3. **Execution**: Walk along that route, avoid dynamic obstacles, reach the kitchen
+4. **Task Sequencing**: Find the coffee, grasp it, carry it back
+
+Each of these involves a different type of planning.
+
+### Path Planning: Finding Feasible Routes
+
+**Path planning** solves the problem: "Given my current position and a goal position, find a collision-free path."
+
+#### Classical Path Planning Algorithms
+
+##### 1. **Dijkstra's Algorithm**
+
+A classic graph-based algorithm that finds the shortest path between two points on a grid or graph.
+
+**How it works**:
+1. Mark start as distance 0
+2. Explore neighbors, updating their distances
+3. Always explore the nearest unvisited node next
+4. Continue until reaching the goal
+
+**Advantages**:
+- Guaranteed to find the shortest path
+- Well-understood and proven
+
+**Disadvantages**:
+- Slow for large environments
+- Treats space as a grid (not natural for continuous spaces)
+- Requires discretizing the environment beforehand
+
+**Example**: Robot on a grid-based floor plan
+```
+S . . . .
+. # # . .
+. # # . G
+. . . . .
+```
+Dijkstra finds: S → → → → ↓ ↓ ← ← ← ↓ G
+
+##### 2. **A* (A-Star) Algorithm**
+
+An improvement on Dijkstra that uses **heuristics** to search smarter.
+
+**Key idea**: Instead of exploring uniformly, prioritize nodes that are likely to lead toward the goal.
+
+**Formula**:
+```
+f(n) = g(n) + h(n)
+
+Where:
+g(n) = actual distance from start to node n
+h(n) = estimated distance from n to goal (heuristic)
+```
+
+The algorithm explores nodes with the lowest f(n) first.
+
+**Common heuristics**:
+- **Euclidean distance**: Straight-line distance to goal (works for open spaces)
+- **Manhattan distance**: Grid-based distance (works for grid worlds)
+
+**Advantages**:
+- Much faster than Dijkstra (if heuristic is good)
+- Still guaranteed to find the shortest path (if heuristic is "admissible")
+- Practical for real-time navigation
+
+**Disadvantages**:
+- Still requires discretized environment
+- Heuristic quality affects performance
+
+##### 3. **Rapidly-Exploring Random Trees (RRT)**
+
+A sampling-based algorithm that doesn't discretize space but instead builds a random tree toward the goal.
+
+**How it works**:
+1. Start with a tree containing only the current position
+2. Randomly sample a point in the environment
+3. Find the nearest node in the tree
+4. Extend toward the sample point
+5. If no collision, add new node to tree
+6. Repeat until reaching the goal
+
+**Advantages**:
+- Works well in high-dimensional spaces (robot arms with many joints)
+- Doesn't require discretizing the environment
+- Fast in practice
+
+**Disadvantages**:
+- Paths are not optimal (often longer than shortest path)
+- Probabilistic guarantee (might not find path immediately)
+- Paths are jerky (not smooth)
+
+**Variants**:
+- **RRT***: Optimized version that finds progressively better paths
+- **Bidirectional RRT**: Grow trees from both start and goal simultaneously
+
+##### 4. **Potential Field Methods**
+
+Models the environment as a potential landscape: goal is a deep well (attractive), obstacles are hills (repulsive).
+
+**Algorithm**: Robot "falls downhill" from current position toward the goal.
+
+**Advantages**:
+- Smooth paths
+- Real-time computation
+- Intuitive
+
+**Disadvantages**:
+- Can get stuck in local minima (valleys that aren't the goal)
+- Requires gradient computation
+- Can produce suboptimal paths
+
+### Motion Planning: Smooth, Feasible Trajectories
+
+Path planning gives a geometric path (sequence of waypoints). Motion planning adds **time**, **dynamics**, and **smoothness**.
+
+**Motion planning** answers: "Given this geometric path, how do I traverse it while respecting the robot's dynamics, actuator limits, and making it smooth?"
+
+#### Trajectory Generation
+
+A trajectory is a path with time information: position, velocity, acceleration as functions of time.
+
+**Example**: A robot hand must move from position A to position B in 2 seconds. A simple linear trajectory might be:
+
+```
+position(t) = A + (B - A) * (t / 2)
+velocity(t) = (B - A) / 2
+acceleration(t) = 0
+```
+
+This is a **minimum-time linear trajectory**.
+
+But this trajectory:
+- Changes velocity instantaneously at start and end (unrealistic for motors)
+- Violates actuator constraints (max acceleration, max velocity)
+
+**Better approach**: Use **smooth trajectories** with constraints
+
+**Common methods**:
+- **Polynomial trajectories** (cubic, quintic): Smooth, respect velocity/acceleration constraints
+- **Spline-based**: Piecewise polynomial paths (like drawing curves)
+- **Optimal trajectories**: Minimize energy, time, or smoothness
+
+#### Obstacle Avoidance in Real-Time
+
+Path planning happens offline (before moving). But the environment might change, or the path might hit a dynamic obstacle.
+
+**Reactive obstacle avoidance** handles this:
+
+**Method 1: Vector Field Histogram**
+- Create a 2D histogram of obstacle locations around the robot
+- Search for valleys (open directions)
+- Command robot toward the largest open direction
+
+**Method 2: Velocity Obstacles**
+- Predict future robot and obstacle positions
+- Identify velocity commands that would cause collisions
+- Command toward safe velocities
+
+**Method 3: Artificial Potential Fields (Real-time)**
+- Compute repulsive force from nearby obstacles
+- Compute attractive force toward goal
+- Follow the net force direction
+
+### Task Planning and Sequencing
+
+Path planning solves: "How do I get from A to B?"
+
+Task planning solves: "What sequence of actions achieves my goal?"
+
+#### Example: Making Coffee
+
+**Goal**: "Bring me a cup of coffee"
+
+**Decomposition**:
+1. Navigate to kitchen
+2. Find coffee maker
+3. If coffee is empty:
+   a. Fill water reservoir
+   b. Add coffee grounds
+4. Press start button
+5. Wait for brewing
+6. Retrieve cup
+7. Navigate back
+8. Hand over coffee
+
+Each step might have sub-steps and **preconditions**:
+
+```
+Action: Grasp coffee cup
+Precondition: Robot hand is empty
+Precondition: Coffee cup is reachable
+Precondition: Robot knows cup location
+Effect: Robot hand holds coffee cup
+```
+
+#### Planning Algorithms for Task Sequencing
+
+**Graph-based planning**:
+- Represent each action as a graph node
+- Edges represent precedence constraints (action A must happen before B)
+- Search for a valid topological ordering
+
+**Hierarchical Task Network (HTN) Planning**:
+- Break down high-level tasks into subtasks
+- Each subtask has alternative methods
+- Recursively decompose until reaching primitive actions
+
+**Temporal planning**:
+- Include time constraints (some tasks must happen simultaneously)
+- Constraints like: "drink coffee only after it cools for 5 minutes"
+
+### Decision-Making Under Uncertainty
+
+Real environments are uncertain. Sensors have noise, actuators are imprecise, the world changes unpredictably.
+
+#### Handling Uncertainty
+
+**Method 1: Robust Planning**
+- Plan paths that have margin for error
+- Avoid places where small errors lead to collision
+- Result: Safe paths, but potentially suboptimal
+
+**Method 2: Adaptive Planning (Replanning)**
+- Execute plan while monitoring
+- If environment changes, replan
+- Example: Robot is navigating to room, discovers a new obstacle, immediately replans
+
+**Method 3: Probabilistic Planning**
+- Compute confidence/probability of success for each action
+- Plan sequences that maximize overall success probability
+- Useful for autonomous systems (robots in healthcare, factories)
+
+### Real-World Examples: Planning in Action
+
+#### Autonomous Warehouse Robots (Amazon Kiva / Digit)
+
+**Task**: Pick up items from shelves and deliver to packing stations
+
+**Planning Stack**:
+1. **High-level task planning**: Which shelf? Which items? Which packing station?
+2. **Path planning**: A* on grid map of warehouse
+3. **Motion planning**: Smooth trajectories to shelf, around obstacles
+4. **Reactive layer**: Avoid dynamic obstacles (humans, other robots)
+
+**Result**: Robots navigate crowded warehouses, avoid collisions, complete thousands of tasks per day
+
+#### Autonomous Vehicles (Self-Driving Cars)
+
+**Task**: Drive from A to B without hitting pedestrians, other cars, or obstacles
+
+**Planning Stack**:
+1. **Route planning**: Which roads? Google Maps-like planning (Dijkstra/A*)
+2. **Behavior planning**: Should I change lanes? Should I speed up?
+3. **Motion planning**: Smooth steering and acceleration commands
+4. **Prediction**: Where will pedestrians and other cars be in 5 seconds?
+5. **Reactive control**: Real-time obstacle avoidance
+
+**Complexity**: High-speed decision-making (~100 Hz), critical safety constraints
+
+#### Robotic Manipulation (Picking and Placing)
+
+**Task**: Pick up an object on a cluttered table and place it in a bin
+
+**Planning Stack**:
+1. **Perception**: Find the object in the image
+2. **Grasp planning**: Which grasp points are stable?
+3. **Arm path planning**: Plan collision-free arm path from current position to grasp
+4. **Motion planning**: Smooth trajectory for gripper approach
+5. **Execution**: Close gripper, lift object, move to bin, place
+
+**Challenge**: Real objects are cluttered, partially occluded; grasp planning is computationally hard
+
+### Combining Planning and Learning
+
+Modern robots increasingly **learn** to plan better, rather than hand-coding all planning rules.
+
+**Example: Learning-Augmented Planning**
+- Train a neural network to predict which actions are "promising"
+- Use this to guide A* search (reduces nodes explored)
+- Result: Faster planning without sacrificing optimality
+
+**Example: Imitation Learning for Navigation**
+- Collect human demonstrations of navigation
+- Train a neural network to predict actions from observations
+- Deploy on robot
+- Result: Paths that look natural and human-like
+
+---
+
+## Hands-On Section
+
+### Exercise 1: A* Path Planning
+
+You have a 5×5 grid with obstacles (#) and an open space (.). The robot starts at S and must reach G.
+
+```
+S . # . .
+. . # . .
+# . . . .
+# . . # G
+. . . . .
+```
+
+**Task**:
+1. Manually apply A* algorithm starting from S
+2. Use Euclidean distance as the heuristic h(n)
+3. Find the optimal path to G
+4. Count how many nodes A* explored (compared to Dijkstra, which explores all nodes)
+
+**Questions**:
+- What was the shortest path?
+- How many nodes did A* explore versus Dijkstra?
+- What would happen if the heuristic was too pessimistic (underestimated distances)?
+
+### Exercise 2: Obstacle Avoidance Simulation
+
+Imagine a robot navigating a corridor with a moving obstacle.
+
+**Setup**:
+- Robot position: (0, 0)
+- Robot goal: (10, 0)
+- Static obstacle at (5, 0.5) to (5, -0.5) [a wall]
+- Dynamic obstacle at (6, 0.5) moving left at 0.5 m/s
+
+**Questions**:
+1. Plan a collision-free path for the robot
+2. What happens if the robot uses the original path and doesn't avoid the dynamic obstacle?
+3. When should the robot replan to avoid the dynamic obstacle?
+4. Would reactive obstacle avoidance be sufficient, or is motion planning necessary?
+
+### Exercise 3: Task Planning for Humanoid Robot
+
+You're programming a humanoid robot to "prepare lunch: make a sandwich and brew coffee."
+
+**Break down the task**:
+1. List all sub-tasks (at least 10)
+2. Identify preconditions for each task
+3. Identify which tasks can happen in parallel
+4. Identify ordering constraints (task A must finish before task B can start)
+
+**Example**:
+- Task: Grasp bread
+- Precondition: Hand is empty, bread is on counter
+- Can happen in parallel with: Coffee brewing
+- Must happen after: Navigate to kitchen
+
+**Reflection**:
+- How would the plan change if the sandwich ingredients are in the refrigerator?
+- What if the coffee maker is broken?
+- How would the robot recover from an error (e.g., dropping the bread)?
+
+---
+
+## Summary
+
+**Planning and decision-making are what enable robots to be truly autonomous.**
+
+**Key Takeaways**:
+- Path planning finds collision-free geometric paths (A*, Dijkstra, RRT)
+- Motion planning adds dynamics, smoothness, and real-time feasibility
+- Obstacle avoidance requires both pre-planning and reactive responses
+- Task planning decomposes high-level goals into executable sequences
+- Modern robots combine classical planning algorithms with learning-based methods
+- Uncertainty requires robustness, replanning, and adaptive strategies
+
+---
+
+## References & Suggested Reading
+
+1. **Path Planning and Algorithms**
+   - LaValle, S. M. (2006). *Planning Algorithms*. Cambridge University Press. (Free online at lavalle.ie/planning/)
+   - Siciliano, B., & Khatib, O. (Eds.). (2016). *Springer Handbook of Robotics* (2nd ed.). Springer. *Chapter on Motion Planning*.
+
+2. **Motion Planning and Obstacle Avoidance**
+   - Khatib, O. (1986). "Real-time obstacle avoidance for manipulators and mobile robots." *International Journal of Robotics Research*, 5(1), 90-98.
+   - Kavraki, L. E., & LaValle, S. M. (2012). "Motion Planning Algorithms." *Handbook of Robotics*, 109-131.
+
+3. **Task Planning and AI**
+   - Ghallab, M., Nau, D., & Traverso, P. (2004). *Automated Planning: Theory and Practice*. Morgan Kaufmann.
+
+4. **Hands-On Projects**:
+   - Implement A* path planning from scratch (Python)
+   - Simulate RRT in 2D space (use a graphics library)
+   - Build a simple task planner (e.g., robot manipulation in simulation)
+   - Implement real-time obstacle avoidance using vector field histograms
+
+---
+
+## Practice & Reflection Questions
+
+1. **Explain** why RRT is better than grid-based Dijkstra for high-dimensional spaces (like planning for a 7-DOF robot arm). What are the trade-offs?
+
+2. **Design** a planning system for a humanoid robot in a dynamic environment (people walking around). Would you use reactive planning, deliberative planning, or hybrid? Why?
+
+3. **Analyze** a failure case: A robot's path planner finds a route, but the robot crashes into a wall. Possible causes: (a) Planner error, (b) Execution error, (c) Dynamic obstacle. How would you debug each?
+
+4. **Compare** task-level planning (high-level goal decomposition) and trajectory-level planning (how to execute each action smoothly). How do they interact?
+
+5. **Design** an adaptive planning system: Robot starts with a plan. If an unexpected obstacle appears, should it immediately replan, or should it try to deviate slightly from the plan? What are the trade-offs?
