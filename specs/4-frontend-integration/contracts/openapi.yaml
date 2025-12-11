@@ -1,0 +1,321 @@
+openapi: 3.0.0
+info:
+  title: RAG Chatbot API
+  description: Frontend-Backend Integration API for RAG Chatbot (Spec 4)
+  version: 1.0.0
+  contact:
+    name: Team
+    url: https://github.com/panaversity
+
+servers:
+  - url: http://localhost:8000
+    description: Local development
+  - url: https://api.example.com
+    description: Production
+
+paths:
+  /api/v1/query:
+    post:
+      summary: Submit a query to the RAG chatbot
+      description: |
+        Accepts a user query and optional context, returns an AI-generated response
+        grounded in the knowledge base with source attribution.
+      operationId: submitQuery
+      tags:
+        - Chat
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QueryRequest'
+            examples:
+              simpleQuery:
+                summary: Basic query
+                value:
+                  query: "What is physical AI?"
+                  stream: false
+              contextQuery:
+                summary: Query with selected text context
+                value:
+                  query: "Explain more about this"
+                  context: "Selected text from documentation"
+                  metadata:
+                    source: "selected-text"
+      responses:
+        '200':
+          description: Successful response with answer and sources
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponsePayload'
+              example:
+                response_id: "550e8400-e29b-41d4-a716-446655440000"
+                answer: "Physical AI refers to artificial intelligence systems that interact with the physical world through sensors and actuators..."
+                context_chunks:
+                  - source_url: "/docs/chapter-1/intro#physical-ai"
+                    relevance_score: 0.95
+                    text: "Physical AI (or embodied AI) refers to..."
+                    metadata:
+                      title: "Introduction to Physical AI"
+                metadata:
+                  model: "gpt-4-turbo"
+                  tokens_used: 156
+                  response_time_ms: 2341
+                  timestamp: 1702329603000
+                  version: "1.0.0"
+        '400':
+          description: Bad request (invalid query format)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error:
+                  code: "VALIDATION_ERROR"
+                  message: "Query is required and must be a non-empty string"
+        '422':
+          description: Unprocessable entity (query too long, etc.)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error:
+                  code: "VALIDATION_ERROR"
+                  message: "Query exceeds maximum length of 10000 characters"
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error:
+                  code: "SERVER_ERROR"
+                  message: "An error occurred while processing your query"
+        '503':
+          description: Service unavailable (backend down, rate limited, etc.)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error:
+                  code: "SERVICE_UNAVAILABLE"
+                  message: "Service is temporarily unavailable. Please try again later."
+
+components:
+  schemas:
+    QueryRequest:
+      type: object
+      required:
+        - query
+      properties:
+        query:
+          type: string
+          minLength: 1
+          maxLength: 10000
+          description: The user's question or query
+          example: "What is physical AI?"
+        context:
+          type: string
+          maxLength: 5000
+          nullable: true
+          description: Optional selected text or context from the documentation
+          example: "The concept of sensors in robotics..."
+        conversation_id:
+          type: string
+          format: uuid
+          nullable: true
+          description: Optional conversation identifier for multi-turn interactions
+          example: "550e8400-e29b-41d4-a716-446655440000"
+        stream:
+          type: boolean
+          default: false
+          description: If true, response is streamed as Server-Sent Events
+          example: false
+        metadata:
+          $ref: '#/components/schemas/RequestMetadata'
+
+    ResponsePayload:
+      type: object
+      required:
+        - response_id
+        - answer
+        - context_chunks
+        - metadata
+      properties:
+        response_id:
+          type: string
+          format: uuid
+          description: Unique identifier for this response
+          example: "550e8400-e29b-41d4-a716-446655440000"
+        answer:
+          type: string
+          minLength: 1
+          maxLength: 50000
+          description: AI-generated response (markdown formatted)
+          example: "Physical AI refers to artificial intelligence systems that interact with the physical world..."
+        context_chunks:
+          type: array
+          items:
+            $ref: '#/components/schemas/ContextChunk'
+          description: Retrieved source documents ranked by relevance
+          minItems: 0
+          maxItems: 10
+        metadata:
+          $ref: '#/components/schemas/ResponseMetadata'
+
+    ContextChunk:
+      type: object
+      required:
+        - source_url
+        - relevance_score
+        - text
+      properties:
+        source_url:
+          type: string
+          format: uri
+          description: URL to the source document section
+          example: "/docs/chapter-1/intro#physical-ai"
+        relevance_score:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 1
+          description: Relevance score (higher = more relevant)
+          example: 0.95
+        text:
+          type: string
+          maxLength: 500
+          description: Text preview/excerpt from the source
+          example: "Physical AI (or embodied AI) refers to artificial intelligence systems that interact with physical environments..."
+        metadata:
+          type: object
+          properties:
+            title:
+              type: string
+              description: Document title
+              example: "Introduction to Physical AI"
+            chapter:
+              type: string
+              description: Chapter or section name
+              example: "Chapter 1: Fundamentals"
+            timestamp:
+              type: integer
+              format: int64
+              description: When this chunk was indexed
+              example: 1702329600000
+
+    RequestMetadata:
+      type: object
+      properties:
+        source:
+          type: string
+          enum:
+            - chat
+            - selected-text
+          default: chat
+          description: Origin of the query
+          example: "chat"
+        clientVersion:
+          type: string
+          description: Widget version number
+          example: "1.0.0"
+        environment:
+          type: string
+          enum:
+            - development
+            - production
+          default: development
+          description: Deployment environment
+          example: "development"
+
+    ResponseMetadata:
+      type: object
+      required:
+        - model
+        - tokens_used
+        - response_time_ms
+        - timestamp
+        - version
+      properties:
+        model:
+          type: string
+          description: AI model used for generation
+          example: "gpt-4-turbo"
+        tokens_used:
+          type: integer
+          minimum: 0
+          description: Total tokens used in request+response
+          example: 156
+        response_time_ms:
+          type: integer
+          minimum: 0
+          description: Time taken to generate response (milliseconds)
+          example: 2341
+        timestamp:
+          type: integer
+          format: int64
+          description: Server timestamp of response
+          example: 1702329603000
+        version:
+          type: string
+          description: API version
+          example: "1.0.0"
+
+    ErrorResponse:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: object
+          required:
+            - code
+            - message
+          properties:
+            code:
+              type: string
+              enum:
+                - NETWORK_ERROR
+                - TIMEOUT
+                - SERVER_ERROR
+                - VALIDATION_ERROR
+                - SERVICE_UNAVAILABLE
+                - UNKNOWN
+              description: Error code
+              example: "TIMEOUT"
+            message:
+              type: string
+              description: Human-readable error message
+              example: "Request exceeded 30 second timeout"
+            details:
+              type: object
+              nullable: true
+              description: Additional error details
+              example: null
+
+  responses:
+    UnauthorizedError:
+      description: Authentication information is missing or invalid
+    NotFoundError:
+      description: The specified resource was not found
+    RateLimitError:
+      description: Rate limit exceeded
+    ServerError:
+      description: Internal server error
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Optional JWT authentication (future feature)
+
+security: []
+
+tags:
+  - name: Chat
+    description: Chat query operations
