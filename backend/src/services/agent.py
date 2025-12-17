@@ -68,7 +68,7 @@ Please answer the question based on the context provided above. If the context i
 
             # Call Cohere API to generate response
             response = self.cohere_client.chat(
-                model="command-r-plus",
+                model="command-r",
                 messages=[
                     {
                         "role": "system",
@@ -160,7 +160,7 @@ Please answer the question based on the context provided above. If the context i
                 answer=answer,
                 context_chunks=context_chunks,
                 metadata=ResponseMetadata(
-                    model="cohere-command-r-plus",
+                    model="cohere-command-r",
                     tokens_used=len(query.split()) + len(answer.split()),  # Rough estimate
                     response_time_ms=response_time_ms,
                     timestamp=int(time.time() * 1000),
