@@ -52,9 +52,9 @@ class RAGChatAPIClient {
   private debug: boolean
 
   constructor(baseUrl?: string, timeout?: number) {
-    this.baseUrl = baseUrl || process.env.REACT_APP_API_URL || 'http://localhost:8000'
-    this.timeout = timeout || parseInt(process.env.REACT_APP_API_TIMEOUT || '30000')
-    this.debug = process.env.REACT_APP_DEBUG === 'true'
+    this.baseUrl = baseUrl || (import.meta.env.VITE_API_URL as string) || 'http://localhost:8000'
+    this.timeout = timeout || parseInt((import.meta.env.VITE_API_TIMEOUT as string) || '30000')
+    this.debug = (import.meta.env.VITE_DEBUG as string) === 'true'
 
     if (this.debug) {
       console.log('[RAGChat] API Client initialized', {

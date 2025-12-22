@@ -79,7 +79,7 @@ async def submit_query(request: QueryRequest):
         raise
 
     except ValueError as e:
-        logger.error(f"Validation error: {e}")
+        logger.error(f"Validation error: {e}", exc_info=True)
         raise HTTPException(
             status_code=422,
             detail={
@@ -91,7 +91,7 @@ async def submit_query(request: QueryRequest):
         )
 
     except TimeoutError:
-        logger.error("Request timeout")
+        logger.error("Request timeout", exc_info=True)
         raise HTTPException(
             status_code=504,
             detail={
@@ -103,13 +103,14 @@ async def submit_query(request: QueryRequest):
         )
 
     except Exception as e:
-        logger.error(f"❌ Error processing query: {e}")
+        logger.error(f"❌ Error processing query: {e}", exc_info=True)
+        error_msg = str(e) if str(e) else "An error occurred while processing your query"
         raise HTTPException(
             status_code=500,
             detail={
                 "error": {
                     "code": "SERVER_ERROR",
-                    "message": "An error occurred while processing your query"
+                    "message": error_msg
                 }
             }
         )
@@ -152,13 +153,14 @@ async def submit_query_stream(request: QueryRequest):
         raise
 
     except Exception as e:
-        logger.error(f"❌ Error processing streaming query: {e}")
+        logger.error(f"❌ Error processing streaming query: {e}", exc_info=True)
+        error_msg = str(e) if str(e) else "An error occurred while processing your query"
         raise HTTPException(
             status_code=500,
             detail={
                 "error": {
                     "code": "SERVER_ERROR",
-                    "message": "An error occurred while processing your query"
+                    "message": error_msg
                 }
             }
         )
@@ -190,7 +192,7 @@ async def get_api_info():
         }
 
     except Exception as e:
-        logger.error(f"Failed to get API info: {e}")
+        logger.error(f"Failed to get API info: {e}", exc_info=True)
         raise HTTPException(
             status_code=500,
             detail={

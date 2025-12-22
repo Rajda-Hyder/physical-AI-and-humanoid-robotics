@@ -31,7 +31,7 @@ class RetrievalService:
             )
 
             # Initialize Cohere client for embeddings
-            self.cohere_client = cohere.ClientV2(api_key=settings.cohere_api_key)
+            self.cohere_client = cohere.Client(api_key=settings.cohere_api_key)
 
             self.collection_name = settings.qdrant_collection_name
             self.embedding_dim = settings.embedding_dimension
@@ -40,8 +40,8 @@ class RetrievalService:
             logger.info(f"✅ Retrieval service initialized with Qdrant")
 
         except Exception as e:
-            logger.error(f"❌ Failed to initialize retrieval service: {e}")
-            raise
+            logger.error(f"❌ Failed to initialize retrieval service: {e}", exc_info=True)
+            raise RuntimeError(f"Retrieval service initialization failed: {str(e)}") from e
 
     def get_or_create_collection(self):
         """Get existing collection or create new one if not exists"""
@@ -64,8 +64,8 @@ class RetrievalService:
                 logger.info(f"✅ Using existing collection: {self.collection_name}")
 
         except Exception as e:
-            logger.error(f"❌ Failed to get/create collection: {e}")
-            raise
+            logger.error(f"❌ Failed to get/create collection: {e}", exc_info=True)
+            raise RuntimeError(f"Collection operation failed: {str(e)}") from e
 
     def embed_text(self, texts: List[str]) -> List[List[float]]:
         """
@@ -90,8 +90,8 @@ class RetrievalService:
             return embeddings
 
         except Exception as e:
-            logger.error(f"❌ Failed to embed texts: {e}")
-            raise
+            logger.error(f"❌ Failed to embed texts: {e}", exc_info=True)
+            raise RuntimeError(f"Embedding failed: {str(e)}") from e
 
     def add_documents(
         self,
@@ -155,8 +155,8 @@ class RetrievalService:
             return total_added
 
         except Exception as e:
-            logger.error(f"❌ Failed to add documents: {e}")
-            raise
+            logger.error(f"❌ Failed to add documents: {e}", exc_info=True)
+            raise RuntimeError(f"Failed to add documents: {str(e)}") from e
 
     def retrieve_context(
         self,
@@ -186,21 +186,26 @@ class RetrievalService:
             # Embed the query
             query_embedding = self.embed_text([query])[0]
 
-            # Search in Qdrant
-            search_results = self.qdrant_client.search(
+            # Search in Qdrant using query_points
+            search_results = self.qdrant_client.query_points(
                 collection_name=self.collection_name,
-                query_vector=query_embedding,
+                query=query_embedding,
                 limit=top_k,
-                score_threshold=score_threshold
+                score_threshold=score_threshold,
+                with_payload=True
             )
 
             # Convert results to ContextChunk objects
             context_chunks = []
-            for result in search_results:
-                payload = result.payload
+
+            # Handle both old search() and new query_points() API structures
+            results = search_results.points if hasattr(search_results, 'points') else search_results
+
+            for result in results:
+                payload = result.payload if hasattr(result, 'payload') else result.get('payload', {})
 
                 # Ensure relevance_score is between 0 and 1
-                relevance_score = max(0.0, min(1.0, result.score))
+                relevance_score = max(0.0, min(1.0, result.score if hasattr(result, 'score') else result.get('score', 0)))
 
                 chunk = ContextChunk(
                     source_url=payload.get("source_url", ""),
@@ -218,8 +223,8 @@ class RetrievalService:
             return context_chunks
 
         except Exception as e:
-            logger.error(f"❌ Failed to retrieve context: {e}")
-            return []
+            logger.error(f"❌ Failed to retrieve context: {e}", exc_info=True)
+            raise RuntimeError(f"Context retrieval failed: {str(e)}") from e
 
     def health_check(self) -> bool:
         """Check if Qdrant is accessible"""

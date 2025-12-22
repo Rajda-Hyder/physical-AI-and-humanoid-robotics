@@ -1,0 +1,33 @@
+# RAG Pipeline Configuration
+
+crawler:
+  base_url: ${TARGET_WEBSITE_URL}
+  request_delay: 0.5
+  timeout: 10
+  max_pages: null
+  respect_robots_txt: true
+  user_agent: "RAGCrawler/1.0"
+
+chunking:
+  min_tokens: 100
+  target_tokens: 350
+  max_tokens: 512
+  overlap_tokens: 50
+
+embedding:
+  model: "embed-english-v3.0"
+  embedding_dimension: 1024
+  batch_size: 100
+  retry_max_attempts: 5
+  retry_initial_delay: 1
+
+retry:
+  max_attempts: 5
+  initial_delay: 1
+  exponential_base: 2
+  max_delay: 60
+
+qdrant:
+  collection_name: "documents"
+  timeout: 30
+  vector_size: 1024

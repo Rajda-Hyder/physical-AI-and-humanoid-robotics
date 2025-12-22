@@ -75,3 +75,13 @@ env/
 # Backend
 backend/.env
 backend/.env.*.local
+
+# RAG Pipeline
+.env.rag
+logs/
+reports/
+output/
+rag_pipeline/**/*.pyc
+rag_pipeline/__pycache__/
+.pytest_cache/
+htmlcov/

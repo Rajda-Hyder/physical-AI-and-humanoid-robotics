@@ -16,7 +16,7 @@ const Root: React.FC<RootProps> = ({ children }) => {
         <AuthProvider>
           {children}
           <ChatWidget
-            apiUrl={process.env.REACT_APP_API_URL || 'http://localhost:8000'}
+            apiUrl="http://localhost:8000"
             position="bottom-right"
             minimized={true}
           />

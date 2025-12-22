@@ -21,11 +21,11 @@ class RAGAgent:
     def __init__(self):
         """Initialize the RAG agent with Cohere client"""
         try:
-            self.cohere_client = cohere.ClientV2(api_key=settings.cohere_api_key)
+            self.cohere_client = cohere.Client(api_key=settings.cohere_api_key)
             logger.info("✅ RAG Agent initialized")
         except Exception as e:
-            logger.error(f"❌ Failed to initialize RAG Agent: {e}")
-            raise
+            logger.error(f"❌ Failed to initialize RAG Agent: {e}", exc_info=True)
+            raise RuntimeError(f"RAG Agent initialization failed: {str(e)}") from e
 
     def generate_response(
         self,
@@ -33,22 +33,10 @@ class RAGAgent:
         context_chunks: list[ContextChunk],
         conversation_history: Optional[list] = None
     ) -> str:
-        """
-        Generate a response grounded in the context
-
-        Args:
-            query: The user's query
-            context_chunks: Retrieved context documents
-            conversation_history: Optional conversation history for multi-turn
-
-        Returns:
-            Generated response string
-        """
         try:
             # Build context string from chunks
             context_str = self._build_context(context_chunks)
 
-            # Build the prompt with instructions
             system_prompt = """You are a helpful AI assistant for a Physical AI and Humanoid Robotics textbook.
 Your role is to answer questions about the textbook content based on the provided context.
 
@@ -58,37 +46,37 @@ IMPORTANT RULES:
 3. Cite the sources when using specific information
 4. Be concise but thorough
 5. Use markdown formatting for readability
-6. If asked about something outside the scope, politely redirect to the textbook content"""
+6. If asked about something outside the scope, politely redirect to the textbook content
+"""
 
             user_message = f"""Question: {query}
 
 {context_str}
 
-Please answer the question based on the context provided above. If the context is empty or not relevant, explain what information you would need."""
+Please answer the question based on the context provided above.
+"""
 
-            # Call Cohere API to generate response
+            # Merge system + user (Cohere style)
+            full_prompt = f"""{system_prompt}
+
+User Question:
+{user_message}
+"""
+
+            # Call Cohere API
             response = self.cohere_client.chat(
-                model="command-r",
-                messages=[
-                    {
-                        "role": "system",
-                        "content": system_prompt
-                    },
-                    {
-                        "role": "user",
-                        "content": user_message
-                    }
-                ]
+                model=settings.cohere_model,
+                message=full_prompt
             )
 
-            answer = response.message.content[0].text
+            answer = response.text
 
             logger.info(f"✅ Generated response ({len(answer)} chars)")
             return answer
 
         except Exception as e:
-            logger.error(f"❌ Failed to generate response: {e}")
-            raise
+            logger.error(f"❌ Failed to generate response: {e}", exc_info=True)
+            raise ValueError(f"Failed to generate response: {str(e)}") from e
 
     def _build_context(self, context_chunks: list[ContextChunk]) -> str:
         """Build context string from chunks"""
@@ -154,13 +142,13 @@ Please answer the question based on the context provided above. If the context i
             # Calculate response time
             response_time_ms = int((time.time() - start_time) * 1000)
 
-            # Create response payload
+            # Create response payload with updated metadata
             response = ResponsePayload(
                 response_id=str(uuid.uuid4()),
                 answer=answer,
                 context_chunks=context_chunks,
                 metadata=ResponseMetadata(
-                    model="cohere-command-r",
+                    model=settings.cohere_model,   # <-- UPDATED
                     tokens_used=len(query.split()) + len(answer.split()),  # Rough estimate
                     response_time_ms=response_time_ms,
                     timestamp=int(time.time() * 1000),
@@ -168,12 +156,13 @@ Please answer the question based on the context provided above. If the context i
                 )
             )
 
+
             logger.info(f"✅ Query processed in {response_time_ms}ms")
             return response
 
         except Exception as e:
-            logger.error(f"❌ Failed to process query: {e}")
-            raise
+            logger.error(f"❌ Failed to process query: {e}", exc_info=True)
+            raise RuntimeError(f"Failed to process query: {str(e)}") from e
 
 
 # Global agent instance

@@ -19,6 +19,7 @@ class Settings(BaseSettings):
 
     # Cohere Configuration
     cohere_api_key: str = Field(..., alias="COHERE_API_KEY")
+    cohere_model: str = Field(default="command-r-plus-08-2024", alias="COHERE_MODEL")
     embedding_model: str = Field(default="embed-english-v3.0", alias="EMBEDDING_MODEL")
     embedding_dimension: int = Field(default=1024, alias="EMBEDDING_DIMENSION")
 
@@ -42,12 +43,16 @@ class Settings(BaseSettings):
     def __init__(self, **data):
         super().__init__(**data)
         # Validate required API keys
-        if not self.qdrant_api_key:
-            raise ValueError("QDRANT_API_KEY environment variable is required")
-        if not self.qdrant_url:
-            raise ValueError("QDRANT_URL environment variable is required")
-        if not self.cohere_api_key:
-            raise ValueError("COHERE_API_KEY environment variable is required")
+        errors = []
+        if not self.qdrant_api_key or self.qdrant_api_key.isspace():
+            errors.append("QDRANT_API_KEY environment variable is required and cannot be empty")
+        if not self.qdrant_url or self.qdrant_url.isspace():
+            errors.append("QDRANT_URL environment variable is required and cannot be empty")
+        if not self.cohere_api_key or self.cohere_api_key.isspace():
+            errors.append("COHERE_API_KEY environment variable is required and cannot be empty")
+
+        if errors:
+            raise ValueError("; ".join(errors))
 
 
 # Create global settings instance
@@ -55,13 +60,25 @@ def get_settings() -> Settings:
     """Get application settings"""
     try:
         settings = Settings()
+        print(f"✅ Settings loaded successfully")
+        print(f"   - Qdrant URL: {settings.qdrant_url}")
+        print(f"   - Collection: {settings.qdrant_collection_name}")
+        print(f"   - Embedding model: {settings.embedding_model}")
+        print(f"   - API host: {settings.api_host}:{settings.api_port}")
     except ValueError as e:
         print(f"❌ Configuration Error: {e}")
-        print("Please ensure all required environment variables are set in .env file")
+        print("\nPlease ensure all required environment variables are set in .env file:")
+        print("  - QDRANT_API_KEY: Your Qdrant cloud API key")
+        print("  - QDRANT_URL: Your Qdrant cloud URL")
+        print("  - COHERE_API_KEY: Your Cohere API key")
         raise
 
     return settings
 
 
 # Initialize settings on module load
-settings = get_settings()
+try:
+    settings = get_settings()
+except ValueError as e:
+    print(f"❌ Failed to initialize settings: {e}")
+    raise
