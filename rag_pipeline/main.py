@@ -106,6 +106,13 @@ def run_pipeline(
         preprocessor = TextPreprocessor(chunking_config)
         chunks = preprocessor.preprocess_crawled_content(crawl_results)
 
+        print(f"Total chunks created: {len(chunks)}")
+        for i, chunk in enumerate(chunks[:5]):  # pehle 5 chunks
+            print(f"Chunk {i}:")
+            print(f"  Text: {chunk.text[:100]}...")
+            print(f"  Token count: {chunk.token_count}")
+
+
         logger.log_info(f"Created {len(chunks)} chunks")
 
         # Save chunks

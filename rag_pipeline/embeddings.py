@@ -6,7 +6,7 @@ import cohere
 
 from .logging_utils import get_logger
 from .utils.retry import ExponentialBackoff
-
+import time
 
 class CohereEmbeddingsGenerator:
     """Generates embeddings using Cohere API."""
@@ -20,7 +20,7 @@ class CohereEmbeddingsGenerator:
         self.embedding_dimension = 1024  # For embed-english-v3.0
 
     def generate_embeddings(
-        self, texts: List[str], batch_size: int = 100, max_retries: int = 5
+        self, texts: List[str], batch_size: int = 20, max_retries: int = 5
     ) -> List[List[float]]:
         """Generate embeddings for texts."""
         all_embeddings = []
@@ -42,7 +42,7 @@ class CohereEmbeddingsGenerator:
                         input_type="search_document",
                     )
 
-                    embeddings = response.embeddings
+                    embeddings = list(response.embeddings.float)
                     all_embeddings.extend(embeddings)
 
                     self.logger.log_operation(
@@ -57,6 +57,8 @@ class CohereEmbeddingsGenerator:
                         self.logger.log_error(f"Failed to generate embeddings after {max_retries} retries: {e}")
                         raise
                     backoff.wait()
+            time.sleep(12)
+
 
         return all_embeddings
 
@@ -85,7 +87,7 @@ def generate_and_store_embeddings(chunks: List, config: Dict, vector_store) -> D
     try:
         embeddings = generator.generate_embeddings(
             texts,
-            batch_size=embedding_config.get("batch_size", 100),
+            batch_size=embedding_config.get("batch_size", 20),
             max_retries=embedding_config.get("retry_max_attempts", 5),
         )
     except Exception as e:

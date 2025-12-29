@@ -20,11 +20,25 @@ class RAGVerifier:
     def report_vector_coverage(self) -> Dict:
         """Report vector coverage by module."""
         try:
-            info = self.vector_store.get_collection_info()
+            # Directly ask Qdrant for the real collection info
+            info = self.vector_store.client.get_collection(
+                collection_name=self.vector_store.collection_name
+            )
+
+            # Qdrant SDK compatibility handling
+
+            if hasattr(info, "points_count"):
+                total_vectors = info.points_count
+            elif hasattr(info, "result") and hasattr(info.result, "points_count"):
+                total_vectors = info.result.points_count
+            else:
+                 total_vectors = 0
+
             report = {
-                "total_vectors": info.get("points_count", 0),
-                "collection": info.get("name"),
+                "total_vectors": total_vectors,
+                "collection": self.vector_store.collection_name,  
             }
+
             self.logger.log_info(f"Vector coverage report: {report}")
             return report
         except Exception as e:
