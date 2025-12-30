@@ -4,12 +4,10 @@ import logging
 import os
 from contextlib import asynccontextmanager
 
-from dotenv import load_dotenv  # <--- add this
-load_dotenv()  # <--- load .env immediately
+from dotenv import load_dotenv
 
-# Quick check
-print("QDRANT_URL =", os.getenv("QDRANT_URL"))
-print("COHERE_API_KEY =", os.getenv("COHERE_API_KEY"))
+# Load .env file if it exists
+load_dotenv()
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware

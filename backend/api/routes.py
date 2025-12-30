@@ -24,7 +24,7 @@ class QueryRequest(BaseModel):
     )
 
     class Config:
-        schema_extra = {
+        json_schema_extra = {
             "example": {
                 "question": "What is Physical AI?",
                 "top_k": 5,

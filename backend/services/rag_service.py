@@ -32,7 +32,7 @@ class RAGService:
         self.embedding_dimension = 1024
 
         try:
-            self.cohere_client = cohere.Client(api_key=cohere_api_key)
+            self.cohere_client = cohere.ClientV2(api_key=cohere_api_key)
             logger.info("Cohere client initialized")
         except Exception as e:
             logger.error(f"Failed to initialize Cohere client: {e}")
@@ -54,7 +54,7 @@ class RAGService:
                 model=self.model,
                 input_type="search_query",
             )
-            embedding = list(response.embeddings[0])
+            embedding = list(response.embeddings.float[0])
             logger.debug(f"Generated embedding for query (dim: {len(embedding)})")
             return embedding
 
