@@ -6,6 +6,13 @@ tiktoken==0.5.2
 nltk==3.8.1
 python-dotenv==1.0.0
 pyyaml==6.0.1
+
+# Web Server
+fastapi==0.128.0
+uvicorn[standard]==0.30.6
+gunicorn==21.2.0
+
+# Testing & Quality (dev only but safe on Railway)
 pytest==7.4.3
 pytest-cov==4.1.0
 black==23.12.1
