@@ -1,7 +1,7 @@
 requests==2.31.0
 beautifulsoup4==4.12.2
 cohere==4.37.0
-qdrant-client==2.7.2
+qdrant-client>=1.9.1,<2.0.0
 tiktoken==0.5.2
 nltk==3.8.1
 python-dotenv==1.0.0
