@@ -32,7 +32,7 @@ class RAGService:
         self.embedding_dimension = 1024
 
         try:
-            self.cohere_client = cohere.ClientV2(api_key=cohere_api_key)
+            self.cohere_client = cohere.Client(api_key=cohere_api_key)
             logger.info("Cohere client initialized")
         except Exception as e:
             logger.error(f"Failed to initialize Cohere client: {e}")
