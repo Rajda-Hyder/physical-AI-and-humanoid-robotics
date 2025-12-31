@@ -55,7 +55,7 @@ class QdrantService:
 
             result = self.client.query_points(
                 collection_name=self.collection_name,
-                vector=query_vector,
+                query=query_vector,
                 limit=top_k,
                 with_payload=True,
             )
