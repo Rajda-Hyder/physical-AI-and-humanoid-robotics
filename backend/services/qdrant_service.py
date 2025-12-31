@@ -53,14 +53,15 @@ class QdrantService:
             query_vector = [float(x) for x in query_vector]
 
 
-            results = self.client.search(
+            results = self.client.search_points(
                 collection_name=self.collection_name,
-                query_vector=query_vector,
+                vector=query_vector,
                 limit=top_k,
+                with_payload=True,
             )
 
             search_results = []
-            for result in results:
+            for result in results.points:
                 if result.payload is None:
                     continue
 
