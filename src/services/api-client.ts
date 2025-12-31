@@ -3,6 +3,8 @@
  * Handles HTTP communication with the FastAPI backend
  */
 
+import { API_CONFIG } from '../config/env';
+
 export interface ChatMessage {
   id: string
   role: 'user' | 'assistant' | 'system'
@@ -43,9 +45,9 @@ class RAGChatAPIClient {
   private debug: boolean
 
   constructor(baseUrl?: string, timeout?: number) {
-    this.baseUrl = baseUrl || (process.env.VITE_API_URL as string) || 'http://localhost:8000'
-    this.timeout = timeout || parseInt((process.env.VITE_API_TIMEOUT as string) || '30000')
-    this.debug = (process.env.VITE_DEBUG as string) === 'true'
+    this.baseUrl = baseUrl || API_CONFIG.baseUrl
+    this.timeout = timeout || API_CONFIG.timeout
+    this.debug = API_CONFIG.debug
 
     if (this.debug) {
       console.log('[RAGChat] API Client initialized', {
