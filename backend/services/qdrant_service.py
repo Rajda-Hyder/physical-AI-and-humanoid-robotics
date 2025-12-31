@@ -61,18 +61,18 @@ class QdrantService:
             )
 
             search_results = []
-            for result in result.points:
-                if result.payload is None:
+            for point in result.points:
+                if point.payload is None:
                     continue
 
                 search_results.append(
                     {
-                        "chunk_id": result.payload.get("chunk_id", ""),
-                        "score": float(result.score),
-                        "text": result.payload.get("text", ""),
-                        "source_url": result.payload.get("source_url", ""),
-                        "module": result.payload.get("module", ""),
-                        "section": result.payload.get("section", ""),
+                        "chunk_id": point.payload.get("chunk_id", ""),
+                        "score": float(point.score),
+                        "text": point.payload.get("text", ""),
+                        "source_url": point.payload.get("source_url", ""),
+                        "module": point.payload.get("module", ""),
+                        "section": point.payload.get("section", ""),
                     }
                 )
 
