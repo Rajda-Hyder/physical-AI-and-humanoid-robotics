@@ -54,7 +54,7 @@ class RAGService:
                 model=self.model,
                 input_type="search_query",
             )
-            embedding = list(response.embeddings.float[0])
+            embedding = list(response.embeddings[0])
             logger.debug(f"Generated embedding for query (dim: {len(embedding)})")
             return embedding
 

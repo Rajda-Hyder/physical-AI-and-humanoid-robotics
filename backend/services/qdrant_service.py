@@ -50,6 +50,9 @@ class QdrantService:
         try:
             logger.debug(f"Searching for top {top_k} similar vectors")
 
+            query_vector = [float(x) for x in query_vector]
+
+
             results = self.client.search(
                 collection_name=self.collection_name,
                 query_vector=query_vector,
