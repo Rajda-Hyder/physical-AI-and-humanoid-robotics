@@ -61,7 +61,7 @@ class QdrantService:
             )
 
             search_results = []
-            for result in results.points:
+            for result in result.points:
                 if result.payload is None:
                     continue
 
