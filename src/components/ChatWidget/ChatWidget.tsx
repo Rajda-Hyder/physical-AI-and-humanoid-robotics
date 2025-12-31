@@ -123,17 +123,16 @@ export const ChatWidget: React.FC<ChatWidgetProps> = ({
                               {message.sources.map((source, idx) => (
                                 <div key={idx} className="source-item">
                                   <a
-                                    href={source.source_url}
+                                    href={source.url}
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="source-link"
                                   >
-                                    {source.metadata?.title || source.source_url}
+                                    {source.section || source.url}
                                   </a>
                                   <span className="source-score">
-                                    Relevance: {(source.relevance_score * 100).toFixed(0)}%
+                                    Relevance: {(source.score * 100).toFixed(0)}%
                                   </span>
-                                  <p className="source-text">{source.text}</p>
                                 </div>
                               ))}
                             </div>

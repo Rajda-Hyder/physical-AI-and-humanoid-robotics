@@ -16,34 +16,25 @@ export interface ChatMessage {
 }
 
 export interface ContextChunk {
-  source_url: string
-  relevance_score: number
-  text: string
-  metadata?: {
-    title?: string
-    chapter?: string
+  url: string
+  section: string
+  score: number
+}
+
+export interface ResponsePayload {
+  question: string
+  context: string
+  sources: ContextChunk[]
+  metadata: {
+    timestamp: number
     [key: string]: any
   }
 }
 
-export interface ResponsePayload {
-  response_id: string
-  answer: string
-  context_chunks: ContextChunk[]
-  metadata: {
-    model: string
-    tokens_used: number
-    response_time_ms: number
-    timestamp: number
-    version: string
-  }
-}
-
 export interface QueryRequest {
-  query: string
-  context?: string | null
-  conversation_id?: string | null
-  stream?: boolean
+  question: string
+  top_k?: number
+  include_context?: boolean
 }
 
 class RAGChatAPIClient {
@@ -73,10 +64,10 @@ class RAGChatAPIClient {
 
     try {
       if (this.debug) {
-        console.log('[RAGChat] Submitting query:', request.query)
+        console.log('[RAGChat] Submitting query:', request.question)
       }
 
-      const response = await fetch(`${this.baseUrl}/api/v1/query`, {
+      const response = await fetch(`${this.baseUrl}/api/query`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -98,10 +89,10 @@ class RAGChatAPIClient {
 
       if (this.debug) {
         console.log('[RAGChat] Response received:', {
-          id: data.response_id,
-          answerLength: data.answer.length,
-          sourcesCount: data.context_chunks.length,
-          responseTimeMs: data.metadata.response_time_ms,
+          question: data.question,
+          contextLength: data.context.length,
+          sourcesCount: data.sources.length,
+          timestamp: data.metadata.timestamp,
         })
       }
 

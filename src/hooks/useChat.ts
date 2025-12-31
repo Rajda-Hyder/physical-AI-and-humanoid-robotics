@@ -108,17 +108,36 @@ export function useChat(options: UseChatOptions = {}) {
 
       try {
         const request: QueryRequest = {
-          query,
-          context: context || null,
-          stream: false,
+          question: query,
+          top_k: 5,
+          include_context: true,
         }
 
         const response: ResponsePayload = await apiClient.current.submitQuery(request)
 
+        // Strict RAG validation: Only show answer if context was found
+        if (!response.sources || response.sources.length === 0) {
+          // No book content found - show error
+          updateLastMessage({
+            content: '',
+            error: {
+              code: 'NO_CONTEXT',
+              message: 'Sorry, I cannot find the answer in the book.',
+            },
+          })
+
+          setState((prev) => ({
+            ...prev,
+            loading: false,
+            error: 'No relevant book content found',
+          }))
+          return
+        }
+
         // Update assistant message with response
         updateLastMessage({
-          content: response.answer,
-          sources: response.context_chunks,
+          content: response.context,
+          sources: response.sources,
           timestamp: response.metadata.timestamp,
         })
 
