@@ -53,7 +53,7 @@ class QdrantService:
             query_vector = [float(x) for x in query_vector]
 
 
-            results = self.client.search_points(
+            result = self.client.query_points(
                 collection_name=self.collection_name,
                 vector=query_vector,
                 limit=top_k,
