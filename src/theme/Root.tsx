@@ -2,6 +2,7 @@ import React, { ReactNode } from 'react';
 import { AuthProvider } from '../contexts/AuthContext';
 import BrowserOnly from '@docusaurus/BrowserOnly';
 import ChatWidget from '../components/ChatWidget';
+import { API_CONFIG } from '../config/env';
 
 interface RootProps {
   children: ReactNode;
@@ -16,7 +17,7 @@ const Root: React.FC<RootProps> = ({ children }) => {
         <AuthProvider>
           {children}
           <ChatWidget
-            apiUrl="http://physical-ai-and-humanoid-robotics-production-e85e.up.railway.app"
+            apiUrl={API_CONFIG.baseUrl}
             position="bottom-right"
             minimized={true}
           />

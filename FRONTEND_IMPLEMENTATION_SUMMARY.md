@@ -173,14 +173,14 @@ updateLastMessage({
 ```diff
 // BEFORE
 <ChatWidget
-  apiUrl="http://localhost:8000"
+  apiUrl="https://localhost:8000"
   position="bottom-right"
   minimized={true}
 />
 
 // AFTER
 <ChatWidget
-  apiUrl="http://physical-ai-and-humanoid-robotics-production-e85e.up.railway.app"
+  apiUrl="https://physical-ai-and-humanoid-robotics-production-e85e.up.railway.app"
   position="bottom-right"
   minimized={true}
 />

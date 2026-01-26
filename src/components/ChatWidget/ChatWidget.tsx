@@ -14,7 +14,7 @@ interface ChatWidgetProps {
 }
 
 export const ChatWidget: React.FC<ChatWidgetProps> = ({
-  apiUrl = 'http://localhost:8000',
+  apiUrl = 'http://127.0.0.1:8000', 
   position = 'bottom-right',
   minimized: initialMinimized = true,
 }) => {
@@ -48,16 +48,21 @@ export const ChatWidget: React.FC<ChatWidgetProps> = ({
     return () => clearInterval(interval)
   }, [chat.loading])
 
+  // -----------------------------
+  // ✅ Submit user query
+  // -----------------------------
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    const trimmedInput = inputValue.trim()
+    if (!trimmedInput) return
 
-    if (!inputValue.trim()) return
-
-    const query = chat.insertSelectedText(inputValue)
-    await chat.submitQuery(query)
+    await chat.submitQuery(trimmedInput)
     setInputValue('')
   }
 
+  // -----------------------------
+  // ✅ Capture selected text from page
+  // -----------------------------
   const handleCaptureSelectedText = () => {
     const text = chat.captureSelectedText()
     if (text) {
@@ -66,7 +71,11 @@ export const ChatWidget: React.FC<ChatWidgetProps> = ({
   }
 
   return (
-    <div className={`chat-widget chat-widget-${position} ${minimized ? 'minimized' : 'expanded'}`}>
+    <div
+      className={`chat-widget chat-widget-${position} ${
+        minimized ? 'minimized' : 'expanded'
+      }`}
+    >
       {/* Header */}
       <div className="chat-header">
         <h3>📚 Textbook Assistant</h3>
@@ -87,11 +96,16 @@ export const ChatWidget: React.FC<ChatWidgetProps> = ({
             {chat.messages.length === 0 ? (
               <div className="chat-placeholder">
                 <p>👋 Hello! Ask me anything about the textbook.</p>
-                <p className="text-small">Selected text from the page will be used as context.</p>
+                <p className="text-small">
+                  Selected text from the page will be used as context.
+                </p>
               </div>
             ) : (
               chat.messages.map((message) => (
-                <div key={message.id} className={`chat-message chat-message-${message.role}`}>
+                <div
+                  key={message.id}
+                  className={`chat-message chat-message-${message.role}`}
+                >
                   <div className="message-header">
                     <span className="message-role">
                       {message.role === 'user' ? '👤 You' : '🤖 Assistant'}
@@ -104,13 +118,18 @@ export const ChatWidget: React.FC<ChatWidgetProps> = ({
                   {message.error ? (
                     <div className="message-error">
                       <p>❌ {message.error.message}</p>
-                      <button onClick={chat.retry} className="retry-btn">
+                      <button
+                        onClick={() => chat.updateLastMessage({ content: '' })}
+                        className="retry-btn"
+                      >
                         Retry
                       </button>
                     </div>
                   ) : (
                     <>
-                      <div className="message-content">{message.content}</div>
+                      <div className="message-content">
+                        {message.content || 'No answer available.'}
+                      </div>
 
                       {/* Sources */}
                       {message.sources && message.sources.length > 0 && (

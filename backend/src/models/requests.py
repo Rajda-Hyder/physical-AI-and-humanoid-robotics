@@ -1,5 +1,8 @@
 """
 Request models for the RAG Chatbot API
+
+This file defines all incoming request schemas
+used by the FastAPI routes.
 """
 
 from pydantic import BaseModel, Field
@@ -7,39 +10,78 @@ from typing import Optional
 
 
 class QueryRequest(BaseModel):
-    """User query request to the RAG chatbot"""
+    """
+    Unified request model for RAG queries.
 
-    query: str = Field(
-        ...,
-        min_length=1,
-        max_length=10000,
-        description="The user's question or query",
-        example="What is physical AI?"
+    Supports both:
+    - `query`  (frontend standard)
+    - `question` (backend/internal standard)
+    """
+
+    # Frontend usually sends this
+    query: Optional[str] = Field(
+        default=None,
+        description="User query from frontend",
+        example="What is Physical AI?"
+    )
+
+    # Backend / internal naming
+    question: Optional[str] = Field(
+        default=None,
+        description="User question",
+        example="Explain Physical AI in simple terms"
     )
 
     context: Optional[str] = Field(
         default=None,
         max_length=5000,
-        description="Optional selected text from documentation for context",
-        example="Selected text from the page..."
+        description="Optional selected documentation text used as extra context",
+        example="Physical AI refers to systems that interact with the real world..."
     )
 
     conversation_id: Optional[str] = Field(
         default=None,
-        description="Optional conversation ID for multi-turn interactions",
-        example="uuid-here"
+        description="Conversation identifier for multi-turn chat",
+        example="b1a2c3d4-uuid"
+    )
+
+    top_k: int = Field(
+        default=5,
+        ge=1,
+        le=20,
+        description="Number of relevant context chunks to retrieve"
+    )
+
+    include_context: bool = Field(
+        default=True,
+        description="Whether to include retrieved context in API response"
+    )
+
+    include_sources: bool = Field(
+        default=False,
+        description="Whether to include source URLs in response"
     )
 
     stream: bool = Field(
         default=False,
-        description="Whether to stream the response (Server-Sent Events)"
+        description="Enable streaming response (future use)"
     )
 
-    class Config:
-        json_schema_extra = {
-            "example": {
-                "query": "What is physical AI?",
-                "context": None,
-                "stream": False
-            }
-        }
+    def get_question(self) -> str:
+        """
+        Returns the final validated user question.
+
+        Priority:
+        1. question
+        2. query
+
+        Raises error if both are missing.
+        """
+
+        if self.question and self.question.strip():
+            return self.question.strip()
+
+        if self.query and self.query.strip():
+            return self.query.strip()
+
+        raise ValueError("Either 'query' or 'question' must be provided.")

@@ -1,143 +1,61 @@
 """
 Response models for the RAG Chatbot API
+
+Defines all structured API responses returned
+to the frontend.
 """
 
 from pydantic import BaseModel, Field
-from typing import List, Optional, Dict, Any
-from datetime import datetime
+from typing import Any, Dict, List, Optional
 
 
 class ContextChunk(BaseModel):
-    """A retrieved source document"""
+    """
+    Individual retrieved context chunk
+    """
 
-    source_url: str = Field(
-        ...,
-        description="URL to the source documentation",
-        example="/docs/chapter-1/intro#physical-ai"
-    )
+    text: str
+    metadata: Dict[str, Any] = Field(default_factory=dict)
 
-    relevance_score: float = Field(
-        ...,
-        ge=0.0,
-        le=1.0,
-        description="Relevance score (0-1, higher = more relevant)",
-        example=0.95
-    )
 
-    text: str = Field(
-        ...,
-        max_length=500,
-        description="Text preview/excerpt from the source",
-        example="Physical AI refers to..."
-    )
+class SourceReference(BaseModel):
+    """
+    Source reference from documentation
+    """
 
-    metadata: Optional[Dict[str, Any]] = Field(
-        default=None,
-        description="Additional metadata about the source",
-        example={"title": "Introduction to Physical AI", "chapter": "Chapter 1"}
-    )
-
-    class Config:
-        json_schema_extra = {
-            "example": {
-                "source_url": "/docs/chapter-1/intro#physical-ai",
-                "relevance_score": 0.95,
-                "text": "Physical AI refers to...",
-                "metadata": {"title": "Introduction"}
-            }
-        }
+    url: Optional[str] = None
+    section: Optional[str] = None
+    score: Optional[float] = None
 
 
 class ResponseMetadata(BaseModel):
-    """Metadata about the response"""
+    """
+    Metadata about the RAG execution
+    """
 
-    model: str = Field(
-        ...,
-        description="AI model used for generation",
-        example="cohere"
-    )
-
-    tokens_used: int = Field(
-        ...,
-        ge=0,
-        description="Total tokens used"
-    )
-
-    response_time_ms: int = Field(
-        ...,
-        ge=0,
-        description="Time taken to generate response (milliseconds)"
-    )
-
-    timestamp: int = Field(
-        ...,
-        description="Server timestamp of response (Unix milliseconds)"
-    )
-
-    version: str = Field(
-        default="1.0.0",
-        description="API version"
-    )
+    model: str
+    context_chunks: int
+    query_succeeded: bool
 
 
 class ResponsePayload(BaseModel):
-    """Complete response from the RAG backend"""
+    """
+    Main successful response payload
+    """
 
-    response_id: str = Field(
-        ...,
-        description="Unique identifier for this response",
-        example="550e8400-e29b-41d4-a716-446655440000"
-    )
+    question: str
+    answer: str
 
-    answer: str = Field(
-        ...,
-        min_length=1,
-        max_length=50000,
-        description="AI-generated response (markdown formatted)"
-    )
+    context: Optional[str] = None
 
-    context_chunks: List[ContextChunk] = Field(
-        default_factory=list,
-        max_length=10,
-        description="Retrieved source documents ranked by relevance"
-    )
+    sources: Optional[List[SourceReference]] = None
 
-    metadata: ResponseMetadata = Field(
-        ...,
-        description="Response metadata"
-    )
-
-    class Config:
-        json_schema_extra = {
-            "example": {
-                "response_id": "uuid-here",
-                "answer": "Physical AI refers to...",
-                "context_chunks": [
-                    {
-                        "source_url": "/docs/chapter-1",
-                        "relevance_score": 0.95,
-                        "text": "..."
-                    }
-                ],
-                "metadata": {
-                    "model": "cohere",
-                    "tokens_used": 156,
-                    "response_time_ms": 2341,
-                    "timestamp": 1702329603000,
-                    "version": "1.0.0"
-                }
-            }
-        }
+    metadata: ResponseMetadata
 
 
 class ErrorResponse(BaseModel):
-    """Error response"""
+    """
+    Standard error response
+    """
 
-    error: Dict[str, Any] = Field(
-        ...,
-        description="Error details",
-        example={
-            "code": "TIMEOUT",
-            "message": "Request exceeded 30 second timeout"
-        }
-    )
+    detail: str

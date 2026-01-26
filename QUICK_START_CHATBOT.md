@@ -151,7 +151,7 @@ This proves the chatbot is enforcing **book-content-only** mode ✅
 **Check:**
 ```bash
 # 1. Is Railway backend running?
-curl http://physical-ai-and-humanoid-robotics-production-e85e.up.railway.app/api/health
+curl https://physical-ai-and-humanoid-robotics-production-e85e.up.railway.app/api/health
 
 # 2. Check browser network tab (F12 → Network)
 # Look for POST request to /api/query
@@ -168,11 +168,11 @@ curl http://physical-ai-and-humanoid-robotics-production-e85e.up.railway.app/api
 # Look for the actual error message
 
 # 2. Is Railway URL correct?
-# Should be: http://physical-ai-and-humanoid-robotics-production-e85e.up.railway.app
+# Should be: https://physical-ai-and-humanoid-robotics-production-e85e.up.railway.app
 # Not: localhost:8000
 
 # 3. Is Railway backend accessible?
-curl http://physical-ai-and-humanoid-robotics-production-e85e.up.railway.app/
+curl https://physical-ai-and-humanoid-robotics-production-e85e.up.railway.app/
 # Should return JSON, not error
 ```
 

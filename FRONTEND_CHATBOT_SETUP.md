@@ -3,7 +3,7 @@
 **Status:** ✅ **COMPLETE - Ready for Testing**
 **Date:** 2025-12-30
 **Frontend Framework:** React + TypeScript (Docusaurus v3)
-**Backend:** Railway FastAPI (http://physical-ai-and-humanoid-robotics-production-e85e.up.railway.app)
+**Backend:** Railway FastAPI (https://physical-ai-and-humanoid-robotics-production-e85e.up.railway.app)
 
 ---
 
@@ -29,7 +29,7 @@ Your chatbot is already integrated into the frontend as a **floating widget** th
    - Source citations with relevance scores
 
 4. **Railway Backend Connection**
-   - URL: `http://physical-ai-and-humanoid-robotics-production-e85e.up.railway.app`
+   - URL: `https://physical-ai-and-humanoid-robotics-production-e85e.up.railway.app`
    - Auto-initialized on app startup
 
 ---
@@ -145,11 +145,11 @@ updateLastMessage({
 **Updated Railway Backend URL:**
 ```typescript
 // CHANGED FROM:
-<ChatWidget apiUrl="http://localhost:8000" ... />
+<ChatWidget apiUrl="https://localhost:8000" ... />
 
 // CHANGED TO:
 <ChatWidget
-  apiUrl="http://physical-ai-and-humanoid-robotics-production-e85e.up.railway.app"
+  apiUrl="https://physical-ai-and-humanoid-robotics-production-e85e.up.railway.app"
   position="bottom-right"
   minimized={true}
 />
@@ -176,7 +176,7 @@ updateLastMessage({
 **If it fails:**
 - Check Railway backend is deployed (see Railway deployment guide)
 - Check browser console (F12) for error messages
-- Verify endpoint: http://physical-ai-and-humanoid-robotics-production-e85e.up.railway.app/api/health
+- Verify endpoint: https://physical-ai-and-humanoid-robotics-production-e85e.up.railway.app/api/health
 
 ---
 
@@ -310,7 +310,7 @@ Create or update `.env.local` in project root:
 
 ```bash
 # Backend API URL (optional, defaults to Railway)
-VITE_API_URL=http://physical-ai-and-humanoid-robotics-production-e85e.up.railway.app
+VITE_API_URL=https://physical-ai-and-humanoid-robotics-production-e85e.up.railway.app
 
 # API timeout in milliseconds (default: 30000)
 VITE_API_TIMEOUT=30000
@@ -323,7 +323,7 @@ VITE_DEBUG=false
 
 ```typescript
 <ChatWidget
-  apiUrl="http://physical-ai-and-humanoid-robotics-production-e85e.up.railway.app"
+  apiUrl="https://physical-ai-and-humanoid-robotics-production-e85e.up.railway.app"
   position="bottom-right"      // 'bottom-right' or 'bottom-left'
   minimized={true}             // true = starts minimized, false = starts expanded
 />
@@ -387,7 +387,7 @@ vercel
 **Cause:** Railway backend not returning sources
 
 **Fix:**
-1. Check Railway backend is running: `curl http://physical-ai-and-humanoid-robotics-production-e85e.up.railway.app/api/health`
+1. Check Railway backend is running: `curl https://physical-ai-and-humanoid-robotics-production-e85e.up.railway.app/api/health`
 2. Verify Qdrant is connected (check Railway dashboard logs)
 3. Verify book content was indexed in Qdrant (see RAG setup guide)
 
@@ -409,11 +409,11 @@ vercel
 **Cause:** Wrong endpoint or Railway URL misconfigured
 
 **Fix:**
-1. Verify Railway URL: `http://physical-ai-and-humanoid-robotics-production-e85e.up.railway.app`
+1. Verify Railway URL: `https://physical-ai-and-humanoid-robotics-production-e85e.up.railway.app`
 2. Check it's using `/api/query` NOT `/api/v1/query`
 3. Test endpoint directly:
    ```bash
-   curl -X POST http://physical-ai-and-humanoid-robotics-production-e85e.up.railway.app/api/query \
+   curl -X POST https://physical-ai-and-humanoid-robotics-production-e85e.up.railway.app/api/query \
      -H "Content-Type: application/json" \
      -d '{"question": "What is Physical AI?", "top_k": 5}'
    ```
@@ -478,7 +478,7 @@ vercel
          ▼
 ┌─────────────────────────────────┐
 │   Railway Backend (FastAPI)      │
-│  http://physical-ai-and-...      │
+│  https://physical-ai-and-...      │
 │                                  │
 │  ┌────────────────────────────┐ │
 │  │  /api/query endpoint       │ │

@@ -1,33 +1,38 @@
 /**
- * Environment Variables Configuration
- *
- * This module exports environment variables that are loaded at build time.
- * Docusaurus v3 bundles this module normally, making env vars available to client code.
+ * Safe environment loader for Docusaurus (NO import.meta, NO process.env)
+ * Works in browser and build.
  */
 
-// Firebase Configuration
+declare global {
+  interface Window {
+    __ENV__?: Record<string, string>;
+  }
+}
+
+const env = typeof window !== 'undefined' ? window.__ENV__ || {} : {};
+
 export const FIREBASE_CONFIG = {
-  apiKey: process.env.VITE_FIREBASE_API_KEY || '',
-  authDomain: process.env.VITE_FIREBASE_AUTH_DOMAIN || '',
-  projectId: process.env.VITE_FIREBASE_PROJECT_ID || '',
-  storageBucket: process.env.VITE_FIREBASE_STORAGE_BUCKET || '',
-  messagingSenderId: process.env.VITE_FIREBASE_MESSAGING_SENDER_ID || '',
-  appId: process.env.VITE_FIREBASE_APP_ID || '',
+  apiKey: env.VITE_FIREBASE_API_KEY || '',
+  authDomain: env.VITE_FIREBASE_AUTH_DOMAIN || '',
+  projectId: env.VITE_FIREBASE_PROJECT_ID || '',
+  storageBucket: env.VITE_FIREBASE_STORAGE_BUCKET || '',
+  messagingSenderId: env.VITE_FIREBASE_MESSAGING_SENDER_ID || '',
+  appId: env.VITE_FIREBASE_APP_ID || '',
 };
 
-// API Configuration
 export const API_CONFIG = {
-  baseUrl: process.env.VITE_API_URL || 'http://localhost:8000',
-  timeout: parseInt(process.env.VITE_API_TIMEOUT || '30000', 10),
-  debug: process.env.VITE_DEBUG === 'true',
+  baseUrl: env.VITE_API_URL || 'http://localhost:8000',
+  timeout: Number.isFinite(Number(env.VITE_API_TIMEOUT))
+    ? Number(env.VITE_API_TIMEOUT)
+    : 30000,
+
+  debug: env.VITE_DEBUG === 'true',
 };
 
-// Helper to check if Firebase is configured
-export const isFirebaseConfigured = (): boolean => {
-  return !!(
+export const isFirebaseConfigured = () =>
+  Boolean(
     FIREBASE_CONFIG.apiKey &&
     FIREBASE_CONFIG.authDomain &&
     FIREBASE_CONFIG.projectId &&
     FIREBASE_CONFIG.appId
   );
-};

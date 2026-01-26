@@ -3,7 +3,7 @@
 **Status:** ✅ **COMPLETE & READY FOR DEPLOYMENT**
 **Build Date:** 2025-12-30
 **Framework:** React 18 + TypeScript + Docusaurus v3
-**Backend:** Railway FastAPI (http://physical-ai-and-humanoid-robotics-production-e85e.up.railway.app)
+**Backend:** Railway FastAPI (https://physical-ai-and-humanoid-robotics-production-e85e.up.railway.app)
 
 ---
 
@@ -134,7 +134,7 @@ User sees answer with book source citations
 ### Chatbot Location (in `src/theme/Root.tsx`)
 ```typescript
 <ChatWidget
-  apiUrl="http://physical-ai-and-humanoid-robotics-production-e85e.up.railway.app"
+  apiUrl="https://physical-ai-and-humanoid-robotics-production-e85e.up.railway.app"
   position="bottom-right"    // 'bottom-right' or 'bottom-left'
   minimized={true}           // true = starts closed, false = starts open
 />
@@ -143,7 +143,7 @@ User sees answer with book source citations
 ### Environment Variables (Optional)
 Create `.env.local`:
 ```bash
-VITE_API_URL=http://physical-ai-and-humanoid-robotics-production-e85e.up.railway.app
+VITE_API_URL=https://physical-ai-and-humanoid-robotics-production-e85e.up.railway.app
 VITE_API_TIMEOUT=30000  # milliseconds
 VITE_DEBUG=false        # set to true for console logs
 ```
@@ -236,7 +236,7 @@ pnpm build
          ↓
 ┌──────────────────────────────────────┐
 │  Railway Backend (FastAPI)           │
-│  http://physical-ai-and-...          │
+│  https://physical-ai-and-...          │
 │                                      │
 │  /api/query endpoint                 │
 │  ├─ Embed question (Cohere)         │
@@ -278,7 +278,7 @@ pnpm build
 ### "API error" or "Cannot POST"
 1. Check Railway URL is correct
 2. Verify endpoint is `/api/query` not `/api/v1/query`
-3. Test endpoint: `curl http://physical-ai-.../api/health`
+3. Test endpoint: `curl https://physical-ai-.../api/health`
 
 ### "Timeout waiting for response"
 1. This is normal for first request (2-3 seconds)

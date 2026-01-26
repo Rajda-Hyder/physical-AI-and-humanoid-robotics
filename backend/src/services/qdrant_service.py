@@ -30,6 +30,7 @@ class QdrantService:
                 url=url,
                 api_key=api_key,
                 prefer_grpc=False,
+                timeout=30,
             )
             logger.info(f"Connected to Qdrant at {url}")
         except Exception as e:
@@ -38,21 +39,13 @@ class QdrantService:
 
     def search(self, query_vector: List[float], top_k: int = 5) -> List[Dict]:
         """
-        Search for similar vectors in the collection.
-
-        Args:
-            query_vector: Query embedding vector
-            top_k: Number of top results to return
-
-        Returns:
-            List of search results with metadata
+        Search for similar vectors in Qdrant using the supported remote API.
         """
         try:
             logger.debug(f"Searching for top {top_k} similar vectors")
-
             query_vector = [float(x) for x in query_vector]
 
-
+            # Use query_points for remote client; this is supported universally.
             result = self.client.query_points(
                 collection_name=self.collection_name,
                 query=query_vector,
@@ -62,19 +55,15 @@ class QdrantService:
 
             search_results = []
             for point in result.points:
-                if point.payload is None:
-                    continue
-
-                search_results.append(
-                    {
-                        "chunk_id": point.payload.get("chunk_id", ""),
-                        "score": float(point.score),
-                        "text": point.payload.get("text", ""),
-                        "source_url": point.payload.get("source_url", ""),
-                        "module": point.payload.get("module", ""),
-                        "section": point.payload.get("section", ""),
-                    }
-                )
+                payload = point.payload or {}
+                search_results.append({
+                    "chunk_id": payload.get("chunk_id", ""),
+                    "score": float(point.score),
+                    "text": payload.get("text", ""),
+                    "source_url": payload.get("source_url", ""),
+                    "module": payload.get("module", ""),
+                    "section": payload.get("section", ""),
+                })
 
             logger.info(f"Found {len(search_results)} results for query")
             return search_results
@@ -82,6 +71,7 @@ class QdrantService:
         except Exception as e:
             logger.error(f"Search failed: {e}")
             raise
+
 
     def get_collection_info(self) -> Dict:
         """
@@ -107,16 +97,20 @@ class QdrantService:
             logger.error(f"Failed to get collection info: {e}")
             raise
 
-    def health_check(self) -> bool:
-        """
-        Check if Qdrant service is healthy.
-
-        Returns:
-            True if healthy, False otherwise
-        """
+    def health_check(self) -> dict:
         try:
-            self.client.get_collection(collection_name=self.collection_name)
-            return True
+            logger.info("Checking Qdrant health")
+
+            collections = self.client.get_collections()
+
+            return {
+                "status": "healthy",
+                "collections": [c.name for c in collections.collections],
+            }
+
         except Exception as e:
-            logger.error(f"Health check failed: {e}")
-            return False
+            logger.error(f"Qdrant health check failed: {e}")
+            return {
+                "status": "unhealthy",
+                "error": str(e),
+            }

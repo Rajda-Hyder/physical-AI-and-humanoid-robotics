@@ -1,204 +1,121 @@
 """
-API Routes for RAG Chatbot
+FastAPI routes for RAG Chatbot
 """
 
 import logging
-from fastapi import APIRouter, HTTPException, BackgroundTasks
-from typing import Optional
+from typing import Optional, List
 
-from src.models import QueryRequest, ResponsePayload, ErrorResponse
-from src.services import get_rag_agent, get_retrieval_service
+from fastapi import APIRouter, HTTPException
+from src.models import QueryRequest, ResponsePayload, SourceReference, ResponseMetadata
+from src.services.rag_service import RAGService
 
 logger = logging.getLogger(__name__)
+router = APIRouter(prefix="/api", tags=["RAG"])
 
-router = APIRouter(prefix="/api/v1", tags=["chat"])
+# Global RAG service
+_rag_service: Optional[RAGService] = None
 
+def set_rag_service(service: RAGService) -> None:
+    global _rag_service
+    _rag_service = service
 
-@router.get("/health", tags=["health"])
-async def health_check():
-    """Health check endpoint"""
+def get_rag_service() -> RAGService:
+    if _rag_service is None:
+        raise RuntimeError("RAG service not initialized")
+    return _rag_service
+
+# -------------------------------
+# Query endpoint
+# -------------------------------
+@router.post("/query", response_model=ResponsePayload, summary="Query the RAG system")
+async def query_rag(request: QueryRequest) -> ResponsePayload:
     try:
-        retrieval_service = get_retrieval_service()
-        is_healthy = retrieval_service.health_check()
-
-        if is_healthy:
-            return {
-                "status": "healthy",
-                "version": "1.0.0",
-                "service": "RAG Chatbot API"
-            }
-        else:
-            return {
-                "status": "unhealthy",
-                "message": "Qdrant connection failed"
-            }, 503
-
-    except Exception as e:
-        logger.error(f"Health check failed: {e}")
-        return {
-            "status": "unhealthy",
-            "message": str(e)
-        }, 503
-
-
-@router.post("/query", response_model=ResponsePayload, tags=["chat"])
-async def submit_query(request: QueryRequest):
-    """
-    Submit a query to the RAG chatbot
-
-    Accepts a user query and optional context, returns an AI-generated response
-    grounded in the knowledge base with source attribution.
-    """
-    try:
-        logger.info(f"📨 Received query: {request.query[:100]}...")
-
-        # Validate query
-        if not request.query or len(request.query.strip()) == 0:
-            raise HTTPException(
-                status_code=400,
-                detail={
-                    "error": {
-                        "code": "VALIDATION_ERROR",
-                        "message": "Query cannot be empty"
-                    }
-                }
-            )
-
-        # Process the query
-        rag_agent = get_rag_agent()
-        response = rag_agent.process_query(
-            query=request.query,
+        service = get_rag_service()
+        question = request.get_question()
+        result = service.query(
+            question=question,
             context=request.context,
-            conversation_id=request.conversation_id
+            conversation_id=request.conversation_id,
+            top_k=request.top_k,
+            include_context=request.include_context,
+            include_sources=request.include_sources,
         )
 
-        logger.info(f"✅ Query processed successfully: {response.response_id}")
-        return response
+        # Prepare sources
+        sources: List[SourceReference] = []
+        if request.include_sources:
+            for s in result.get("sources", []):
+                sources.append(SourceReference(
+                    url=s.get("url"),
+                    section=s.get("section"),
+                    score=s.get("score"),
+                ))
 
-    except HTTPException:
-        raise
+        # Build metadata
+        metadata = ResponseMetadata(
+            model=result["metadata"].get("model", "unknown"),
+            context_chunks=result["metadata"].get("context_chunks", 0),
+            query_succeeded=result["metadata"].get("query_succeeded", False)
+        )
+
+        # Build response
+        response = ResponsePayload(
+            question=question,
+            answer=result.get("answer", "No relevant answer found."),
+            context=result.get("context") if request.include_context else None,
+            sources=sources if request.include_sources else None,
+            metadata=metadata
+        )
+
+        return response
 
     except ValueError as e:
-        logger.error(f"Validation error: {e}", exc_info=True)
-        raise HTTPException(
-            status_code=422,
-            detail={
-                "error": {
-                    "code": "VALIDATION_ERROR",
-                    "message": str(e)
-                }
-            }
-        )
-
-    except TimeoutError:
-        logger.error("Request timeout", exc_info=True)
-        raise HTTPException(
-            status_code=504,
-            detail={
-                "error": {
-                    "code": "TIMEOUT",
-                    "message": "Request exceeded timeout limit"
-                }
-            }
-        )
-
+        logger.warning(f"Validation error: {e}")
+        raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
-        logger.error(f"❌ Error processing query: {e}", exc_info=True)
-        error_msg = str(e) if str(e) else "An error occurred while processing your query"
-        raise HTTPException(
-            status_code=500,
-            detail={
-                "error": {
-                    "code": "SERVER_ERROR",
-                    "message": error_msg
-                }
-            }
-        )
+        logger.error(f"Query processing failed: {e}")
+        raise HTTPException(status_code=500, detail="Query processing failed")
 
+# -------------------------------
+# Health endpoint
+# -------------------------------
+from pydantic import BaseModel
 
-@router.post("/query/stream", tags=["chat"])
-async def submit_query_stream(request: QueryRequest):
-    """
-    Submit a query with streaming response (Server-Sent Events)
+class HealthResponse(BaseModel):
+    status: str
+    cohere: str
+    qdrant: str
+    model: str
 
-    Returns answer chunks as they are generated.
-    """
+@router.get("/health", response_model=HealthResponse, summary="Health check")
+async def health_check():
     try:
-        logger.info(f"📨 Received streaming query: {request.query[:100]}...")
-
-        # Validate query
-        if not request.query or len(request.query.strip()) == 0:
-            raise HTTPException(
-                status_code=400,
-                detail={
-                    "error": {
-                        "code": "VALIDATION_ERROR",
-                        "message": "Query cannot be empty"
-                    }
-                }
-            )
-
-        # Process the query
-        rag_agent = get_rag_agent()
-        response = rag_agent.process_query(
-            query=request.query,
-            context=request.context,
-            conversation_id=request.conversation_id
+        service = get_rag_service()
+        health = service.health_check()
+        return HealthResponse(
+            status=health.get("status", "unknown"),
+            cohere=health.get("cohere", "unknown"),
+            qdrant=health.get("qdrant", "unknown"),
+            model=health.get("model", "unknown"),
         )
-
-        logger.info(f"✅ Streaming query processed: {response.response_id}")
-        return response
-
-    except HTTPException:
-        raise
-
     except Exception as e:
-        logger.error(f"❌ Error processing streaming query: {e}", exc_info=True)
-        error_msg = str(e) if str(e) else "An error occurred while processing your query"
-        raise HTTPException(
-            status_code=500,
-            detail={
-                "error": {
-                    "code": "SERVER_ERROR",
-                    "message": error_msg
-                }
-            }
-        )
+        logger.error(f"Health check failed: {e}")
+        raise HTTPException(status_code=500, detail="Health check failed")
 
-
-@router.get("/info", tags=["info"])
-async def get_api_info():
-    """Get API information and configuration"""
+# -------------------------------
+# Info endpoint
+# -------------------------------
+@router.get("/info", summary="Service information")
+async def service_info():
     try:
-        retrieval_service = get_retrieval_service()
-        collections = retrieval_service.qdrant_client.get_collections()
-        collection_count = len(collections.collections) if collections else 0
-
+        service = get_rag_service()
+        collection_info = service.qdrant_service.get_collection_info()
         return {
             "name": "RAG Chatbot API",
             "version": "1.0.0",
-            "description": "Retrieval-Augmented Generation chatbot for Physical AI textbook",
-            "endpoints": {
-                "health": "/api/v1/health",
-                "query": "/api/v1/query",
-                "query_stream": "/api/v1/query/stream",
-                "info": "/api/v1/info"
-            },
-            "integrations": {
-                "qdrant_collection_count": collection_count,
-                "embedding_model": "cohere",
-                "response_model": "cohere-command-r-plus"
-            }
+            "model": service.model,
+            "collection": collection_info,
         }
-
     except Exception as e:
-        logger.error(f"Failed to get API info: {e}", exc_info=True)
-        raise HTTPException(
-            status_code=500,
-            detail={
-                "error": {
-                    "code": "SERVER_ERROR",
-                    "message": "Failed to retrieve API information"
-                }
-            }
-        )
+        logger.error(f"Failed to get service info: {e}")
+        raise HTTPException(status_code=500, detail="Failed to get service info")
