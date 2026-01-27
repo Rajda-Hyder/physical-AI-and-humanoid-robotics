@@ -13,9 +13,9 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
-from api.routes import router
-from services import QdrantService, RAGService
-from api.routes import set_rag_service
+from backend.src.api.routes import router
+from backend.src.services import QdrantService, RAGService
+from backend.src.api.routes import set_rag_service
 
 # Configure logging
 logging.basicConfig(
