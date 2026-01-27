@@ -13,7 +13,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
-from backend.api import router
+from backend.api.routes import router
 from backend.services import QdrantService, RAGService
 from backend.api.routes import set_rag_service
 
