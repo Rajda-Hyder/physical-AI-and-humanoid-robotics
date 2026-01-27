@@ -16,9 +16,9 @@ assert os.getenv("QDRANT_COLLECTION_NAME"), "QDRANT_COLLECTION_NAME is missing a
 # 3️⃣ Import FastAPI and router
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from .routes import router
+from routes import router
 from src.services import QdrantService, RAGService
-from .routes import set_rag_service
+from routes import set_rag_service
 import logging
 
 logging.basicConfig(level=logging.INFO)
