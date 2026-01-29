@@ -10,7 +10,7 @@ from src.models import QueryRequest, ResponsePayload, SourceReference, ResponseM
 from src.services.rag_service import RAGService
 
 logger = logging.getLogger(__name__)
-router = APIRouter(prefix="/api", tags=["RAG"])
+router = APIRouter(prefix="/api/v1", tags=["chat"])
 
 # Global RAG service
 _rag_service: Optional[RAGService] = None

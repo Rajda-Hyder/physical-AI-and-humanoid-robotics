@@ -49,7 +49,7 @@ class RAGChatAPIClient {
   private debug: boolean
 
   constructor(baseUrl?: string, timeout?: number) {
-    this.baseUrl = baseUrl || API_CONFIG.baseUrl
+    this.baseUrl = (baseUrl || API_CONFIG.baseUrl).replace(/\/$/, '') + '/api/v1'
     this.timeout = timeout || API_CONFIG.timeout
     this.debug = API_CONFIG.debug
 
@@ -121,7 +121,7 @@ class RAGChatAPIClient {
 
   async healthCheck(): Promise<boolean> {
     try {
-      const res = await fetch(`${this.baseUrl}/api/v1/health`)
+      const res = await fetch(`${this.baseUrl}/health`)
       return res.ok
     } catch {
       return false
