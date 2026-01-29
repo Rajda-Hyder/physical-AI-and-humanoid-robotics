@@ -11,10 +11,7 @@ export interface ChatMessage {
   content: string
   timestamp: number
   sources?: ContextChunk[]
-  error?: {
-    code: string
-    message: string
-  }
+  error?: { code: string; message: string }
 }
 
 export interface ContextChunk {
@@ -25,20 +22,14 @@ export interface ContextChunk {
 
 export interface ResponsePayload {
   question: string
-  answer: string          
+  answer: string
   context?: string | null
   sources?: ContextChunk[] | null
-  metadata: {
-    timestamp?: number
-    model?: string
-    context_chunks?: number
-    query_succeeded?: boolean
-    [key: string]: any
-  }
+  metadata: { [key: string]: any }
 }
 
 export interface QueryRequest {
-  question: string       // MUST be 'question' for backend
+  question: string
   top_k?: number
   include_context?: boolean
 }
@@ -49,7 +40,8 @@ class RAGChatAPIClient {
   private debug: boolean
 
   constructor(baseUrl?: string, timeout?: number) {
-    this.baseUrl = (baseUrl || API_CONFIG.baseUrl).replace(/\/$/, '') + '/api/v1'
+    // ✅ DO NOT add extra /api/v1 here, backend already has it
+    this.baseUrl = (baseUrl || API_CONFIG.baseUrl).replace(/\/$/, '')
     this.timeout = timeout || API_CONFIG.timeout
     this.debug = API_CONFIG.debug
 
@@ -68,26 +60,21 @@ class RAGChatAPIClient {
     try {
       if (this.debug) console.log('[RAGChat] Submitting query:', request.question)
 
-      // POST payload - ONLY send fields backend accepts
       const payload = {
-        question: request.question,  
-        context: null,                  
-        conversation_id: null,          
-        stream: false                   
-      };
+        question: request.question,
+        context: null,
+        conversation_id: null,
+        stream: false,
+      }
 
-      console.log('FINAL PAYLOAD →', JSON.stringify(payload))
-
-      console.log("API BASE URL =", this.baseUrl)
+      if (this.debug) console.log('FINAL PAYLOAD →', JSON.stringify(payload))
+      if (this.debug) console.log('API BASE URL =', this.baseUrl)
 
       const response = await fetch(`${this.baseUrl}/api/query`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(payload)
-      });
-
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      })
 
       clearTimeout(timeoutId)
 
@@ -99,22 +86,10 @@ class RAGChatAPIClient {
       }
 
       const data: ResponsePayload = await response.json()
-
-      if (this.debug) {
-        console.log('[RAGChat] Response received:', {
-          question: data.question,
-          contextLength: data.context?.length ?? 0,
-          sourcesCount: data.sources?.length ?? 0,
-          metadata: data.metadata,
-        })
-      }
-
       return data
     } catch (error: any) {
       clearTimeout(timeoutId)
-      if (error.name === 'AbortError') {
-        throw new Error(`Request timeout after ${this.timeout}ms`)
-      }
+      if (error.name === 'AbortError') throw new Error(`Request timeout after ${this.timeout}ms`)
       throw error
     }
   }
@@ -130,13 +105,7 @@ class RAGChatAPIClient {
 }
 
 let clientInstance: RAGChatAPIClient | null = null
-
 export function getAPIClient(baseUrl?: string, timeout?: number) {
-  if (!clientInstance) {
-    clientInstance = new RAGChatAPIClient(
-      baseUrl || API_CONFIG.baseUrl,
-      timeout || API_CONFIG.timeout
-    )
-  }
-  return clientInstance;
+  if (!clientInstance) clientInstance = new RAGChatAPIClient(baseUrl || API_CONFIG.baseUrl, timeout || API_CONFIG.timeout)
+  return clientInstance
 }
