@@ -3,7 +3,7 @@
 import logging
 import os
 from contextlib import asynccontextmanager
-
+from typing import Optional
 from dotenv import load_dotenv
 
 # Load .env file if it exists
@@ -26,8 +26,7 @@ logger = logging.getLogger(__name__)
 
 
 # Global service instance
-_rag_service: RAGService = None
-
+_rag_service: Optional[RAGService] = None
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -111,16 +110,11 @@ app = FastAPI(
 # Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:3000",
-        "https://physical-ai-and-humanoid-robotics-eight.vercel.app",
-    ],
+    allow_origin_regex=r"http://localhost:3000|https://.*\.vercel\.app",                                           
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-
 
 # Error handlers
 @app.exception_handler(Exception)
@@ -154,9 +148,8 @@ if __name__ == "__main__":
     import uvicorn
 
     uvicorn.run(
-        "app:app",
+        app,
         host="0.0.0.0",
         port=8000,
-        reload=True,
         log_level="info",
     )
